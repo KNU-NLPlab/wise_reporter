@@ -40,7 +40,7 @@ class DocGraphAnalyzer():
         if os.path.exists(self.output_path) == False:
             os.makedirs(self.output_path)
 
-    def extract_subtopic_info(self, doc_info_list, top_doc_num=10, top_keyword_num=10):
+    def extract_subtopic_info(self, doc_info_list, top_doc_num=10, top_keyword_num=10, hierarchy=2, goal_level=2):
         '''
         Extract top keyword and document id in several subtopics
         Args:
@@ -64,7 +64,7 @@ class DocGraphAnalyzer():
         
         docgraph_obj = DocumentGraph()
         _ = docgraph_obj.GenerateGraph(opt, raw_doc_obj.idx2keyword, raw_doc_obj.idx2edge, raw_doc_obj.edgeidx2frequency)
-        _ = docgraph_obj.FindCommunity(opt)
+        _ = docgraph_obj.FindCommunity(opt, hierarchy, goal_level)
         docgraph_obj.SetSubgraphdata(raw_doc_obj.keywordidx2frequency, raw_doc_obj.edge2idx, raw_doc_obj.edgeidx2frequency)
         
         rel_e = 1
@@ -73,9 +73,14 @@ class DocGraphAnalyzer():
                                      raw_doc_obj.keyword2df, raw_doc_obj.list_edge2freq_indocuments, docgraph_obj.list_edge2freq_insubtopics,
                                      raw_doc_obj.avg_keywords_len, raw_doc_obj.idx2edge, select_rel=rel_e)
         relevance_obj.ExtractRepresentative()
-
+        
+        ## modified by sspark ##
+        # docidx_insubtopics : 소주제 마다 모든 문서의 아이디 존재, Document-Node를 만들기 위해 사용할 수 있는 변수
+        ## modified by sspark ##
+        
+        
         analsis_obj = Analysis()
-        analsis_obj.SetVariable(opt, relevance_obj.np_docsNsubtopic_rel, doc_id_list, docgraph_obj.community.subgraphs(),
+        analsis_obj.SetVariable(opt, relevance_obj.np_docsNsubtopic_rel, doc_id_list, docgraph_obj.list_subgraph,
                                 docgraph_obj.list_community, raw_doc_obj.edgeidx2frequency, docgraph_obj.list_keyword2freq_insubtopics,
                                 docgraph_obj.list_edge2freq_insubtopics, relevance_obj.docidx_insubtopics,
                                 raw_doc_obj.idx2keyword, raw_doc_obj.idx2edge, 
