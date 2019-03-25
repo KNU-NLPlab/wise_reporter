@@ -40,7 +40,7 @@ class DocGraphAnalyzer():
         if os.path.exists(self.output_path) == False:
             os.makedirs(self.output_path)
 
-    def extract_subtopic_info(self, doc_info_list, top_doc_num=10, top_keyword_num=10, hierarchy=2, goal_level=2):
+    def extract_subtopic_info(self, doc_info_list, top_doc_num=10, top_keyword_num=10, hierarchy=True, cutting_level=2):
         '''
         Extract top keyword and document id in several subtopics
         Args:
@@ -64,7 +64,7 @@ class DocGraphAnalyzer():
         
         docgraph_obj = DocumentGraph()
         _ = docgraph_obj.GenerateGraph(opt, raw_doc_obj.idx2keyword, raw_doc_obj.idx2edge, raw_doc_obj.edgeidx2frequency)
-        _ = docgraph_obj.FindCommunity(opt, hierarchy, goal_level)
+        _ = docgraph_obj.FindCommunity(opt, hierarchy, cutting_level)
         docgraph_obj.SetSubgraphdata(raw_doc_obj.keywordidx2frequency, raw_doc_obj.edge2idx, raw_doc_obj.edgeidx2frequency)
         
         rel_e = 1
