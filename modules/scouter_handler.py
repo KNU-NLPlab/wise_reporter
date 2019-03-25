@@ -128,15 +128,15 @@ class ScouterHandler():
         '''
         Make a query body with keyword string
         Args:
-            doc_id_list (dict): doc id list
+            doc_id_list (list): doc id list
             filters (list): list of fields to be asked
         Returns:
             query_body (dict): query body to be used on elasticsearch
         '''
         
         # make a conjugated filter for elasticsearch
-        # TODO: 필요한 정보만 가져올 수 있게 되면 filter도 같이 달아줘야 함
-        or_query = { "match": { "news_id": ' '.join(map(str, doc_id_list)) } }
+        #or_query = { "match": { "query": doc_id_list}, "fields": ["news_id"] }
+        or_query = { "constant_score": {"filter": { "terms": { "news_id": doc_id_list } } } }
         query_body = { 'query': or_query }
         if filters is not None:
             query_body['_source'] = filters

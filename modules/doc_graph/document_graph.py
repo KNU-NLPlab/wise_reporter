@@ -1,3 +1,5 @@
+from igraph import *
+
 class DocumentGraph:
     def __init__(self):
         self.obj_graph = None

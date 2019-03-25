@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 class Analysis:
     def __init__(self):
         self.relevance_indocs = None
@@ -40,7 +42,7 @@ class Analysis:
                
         top_docidx_insubtopics = []
         for docidxs in docidx_insubtopics:
-            top_docidx_insubtopics.append(docidxs[:opt.represent_size])       
+            top_docidx_insubtopics.append(docidxs[:opt.top_doc_num])       
             
         self.top_edge_insubtopics = top_edge_insubtopics
         self.top_docidx_insubtopics = top_docidx_insubtopics

@@ -1,5 +1,14 @@
 import os
+import sys
 from collections import Counter
+from operator import itemgetter
+
+from modules.doc_graph.document_raw import DocumentRaw
+from modules.doc_graph.document_graph import DocumentGraph
+from modules.doc_graph.relevance import Relevance
+from modules.doc_graph.analysis import Analysis
+from modules.doc_graph.evaluation import Evaluation
+from modules.doc_graph.utils import *
 
 
 class DocGraphAnalyzer():
@@ -36,7 +45,6 @@ class DocGraphAnalyzer():
         Extract top keyword and document id in several subtopics
         Args:
             doc_info_list (list): list of document information dictionary
-            top_keyword_num
         '''
         doc_id_list = [doc_info['news_id'] for doc_info in doc_info_list]
         
@@ -201,7 +209,7 @@ class DocGraphAnalyzer():
             edge_cnt = Counter()
             for s in str_list:
                 word_pair, cnt = s.split('=')
-                w1, w2 = word_pair[1:-1].split(', ')
+                w1, w2 = word_pair[1:-1].split(',')
                 # Cut된 단어가 하나라도 있으면 제외
                 if w1 not in word2idx or w2 not in word2idx:
                     continue

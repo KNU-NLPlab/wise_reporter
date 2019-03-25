@@ -1,2 +1,7 @@
-elasticsearch
-configargparse
+# Scouter
+elasticsearch==6.5.1
+
+# Document graph analyzer
+numpy
+gensim
+python-igraph

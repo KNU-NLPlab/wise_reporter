@@ -1,3 +1,5 @@
+import numpy as np
+
 class Relevance:
     def __init__(self):        
         self.np_docsNfeature = None

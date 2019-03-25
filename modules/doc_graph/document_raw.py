@@ -1,3 +1,7 @@
+import os
+import sys
+import collections
+
 class DocumentRaw:
     def __init__(self):
         self.info_in_listdoc = None  # 본문, 타이틀용, 나중에 지우면 됨
