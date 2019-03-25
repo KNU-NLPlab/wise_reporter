@@ -1,7 +1,10 @@
 import os
+import re
 import sys
 from collections import Counter
 from operator import itemgetter
+
+from modules.base_module import BaseModule
 
 from modules.doc_graph.document_raw import DocumentRaw
 from modules.doc_graph.document_graph import DocumentGraph
@@ -11,21 +14,19 @@ from modules.doc_graph.evaluation import Evaluation
 from modules.doc_graph.utils import *
 
 
-class DocGraphAnalyzer():
+class DocGraphAnalyzer(BaseModule):
     '''
     Analyzer class to detect keyword set of communities in the graph of documents
     Args:
-        topic (string): scouter server address
-        size (string): scroll size that client want to get at once
+        topic (string): a keyword query
+        df_bound (tuple of float): a lower and upper bound for keyword preprocessing
+        min_keyword (int): a bound to use a community as a cluster
     '''
-    def __init__(self, topic, output_path='results/{}/subtopic', df_bound=(0.02, 0.70),
-                 min_keyword=20, view_keyword=20, viz_data=False):
+    def __init__(self, topic, df_bound=(0.02, 0.70), min_keyword=20):
         self.topic = topic
-        self.output_path = output_path.format(topic)
         self.df_bound = df_bound
         
         self.min_keyword = min_keyword
-        self.view_keyword = view_keyword
         
         self.raw_doc_obj = None
         self.docgraph_obj = None
@@ -36,15 +37,15 @@ class DocGraphAnalyzer():
         self.top_keyword_list = None
         
         self.viz_data = None
-        
-        if os.path.exists(self.output_path) == False:
-            os.makedirs(self.output_path)
 
-    def extract_subtopic_info(self, doc_info_list, top_doc_num=10, top_keyword_num=10):
+    def process_data(self, doc_info_list, top_doc_num=10, top_keyword_num=10):
         '''
+        Overwrited method from BaseModule class
         Extract top keyword and document id in several subtopics
         Args:
             doc_info_list (list): list of document information dictionary
+            top_doc_num (int): the number of documents to retrieve
+            top_keyword_num (int): the number of keywords to retrieve
         '''
         doc_id_list = [doc_info['news_id'] for doc_info in doc_info_list]
         
@@ -56,8 +57,7 @@ class DocGraphAnalyzer():
         sys.argv = []
         parser = argparse.ArgumentParser(sys.argv)
         opt = ParseOption(parser)
-        
-        opt.output_path = self.output_path        
+           
         opt.min_keyword = self.min_keyword
         opt.top_doc_num = top_doc_num
         opt.top_keyword_num = top_keyword_num
@@ -100,8 +100,15 @@ class DocGraphAnalyzer():
             print('Community {} : {:4} Keyword, ({})'.format(comm_idx, len(comm_word_list), '/'.join(top_keywords)))
         print()
             
-    def make_viz_data(self, top_doc_info_list, node_cut=50, edge_cut=20, file_name='detail.json'):
-        
+    def generate_json(self, top_doc_info_list, node_cut=50, edge_cut=20):
+        '''
+        Overwrited method from BaseModule class
+        Generate json dict and put it in own json attribute(self.main_json, self.detailed_json)
+        Args:
+            top_doc_info_list (list): list of top document information dictionary
+            node_cut (int): the maximum number of nodes to use for each cluster in visualization
+            edge_cut (int): the maximum number of edges to use for each cluster in visualization
+        '''        
         def verticesInSameCommunity(v1, v2):
             v1_comm = None
             v2_comm = None
@@ -157,17 +164,13 @@ class DocGraphAnalyzer():
         print('Viz Node # : ', len(node_info))
         print('Viz Edge # : ', len(edge_info))
         
-        if os.path.exists(self.output_path) == False:
-            os.makedirs(self.output_path)
-            
-        with open(os.path.join(self.output_path, file_name), 'w', encoding='utf8') as fp:
-            json.dump(json_data, fp)
-            
-        self.viz_data = json_data
+        self.main_json = [min([doc_info['newsTitle'][:re.search('$|[\.…]', doc_info['newsTitle']).start()].strip()
+                               for doc_info in doc_info_list], key=len) for doc_info_list in top_doc_info_list]
+        self.detailed_json = json_data
         
     def make_summary(self, file_name='summary.txt', title=True, content=False):
         with open(os.path.join(self.output_path, file_name), 'w', encoding='utf8') as fp:
-            for i, cluster_top_info in self.viz_data['clusters'].items():
+            for i, cluster_top_info in self.detailed_json['clusters'].items():
                 fp.write('Community {} : {}\n'.format(i, ' / '.join(cluster_top_info['top_keyword'])))
                 if title:
                     fp.write('\n'.join(cluster_top_info['top_title']))

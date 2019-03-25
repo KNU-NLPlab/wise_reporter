@@ -10,6 +10,10 @@ class BaseModule():
         '''
         
         '''
+        
+        self.main_json = None
+        self.detailed_json = None
+        
         raise NotImplementedError
         
     def process_data(*params):
@@ -18,7 +22,7 @@ class BaseModule():
         '''
         raise NotImplementedError
     
-    def get_viz_json(*params)
+    def generate_json(*params):
         '''
         
         '''
