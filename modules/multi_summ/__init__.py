@@ -1,0 +1,1 @@
+from modules.multi_summ.main import stc_extract, make_summary
