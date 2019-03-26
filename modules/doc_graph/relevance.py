@@ -20,7 +20,7 @@ class Relevance:
         relevance_value = 0
         for key in keyword2weight_insubtopics.keys():
             idf_value = (doc_size - keyword2df[key] + 0.5) / (keyword2df[key] + 0.5)
-            relevance_value += idf_value * keyword2weight_indocs[key] * keyword2weight_insubtopics[key]
+            relevance_value += idf_value * keyword2weight_indocs[key] / sum(keyword2weight_indocs) # * keyword2weight_insubtopics[key]
         
         return relevance_value
     
@@ -74,11 +74,20 @@ class Relevance:
     #         문서의 키워드의 평균사이즈, 파라미터 k1, 파라미터 b
     # output : Relevance Matrix (doc_size, subtopic_size)
     def CalculateRelevance(self, list_keyword2weight_indocs, list_keyword2weight_insubtopics, keyword2df,
-                           list_edge2weight_indocs, list_edge2weight_insubtopics, avg_keywords_len, idx2edge, select_rel=0):
+                           list_edge2weight_indocs, list_edge2weight_insubtopics, avg_keywords_len, idx2edge, 
+                           list_subgraph, select_rel=0):
         doc_size = len(list_keyword2weight_indocs)
         subtopic_size = len(list_keyword2weight_insubtopics)
         
-        np_docsNsubtopic_rel = np.zeros( (doc_size, subtopic_size) )
+        if select_rel == 4:
+            list_graph_rel = [e.betweenness() for e in list_subgraph]
+        elif select_rel == 5:
+            list_graph_rel = [e.pagerank() for e in list_subgraph]
+        elif select_rel == 6:
+            list_graph_rel = [e.closeness() for e in list_subgraph]
+        list_subgraph_idx = [{keyidx:i for i, keyidx in enumerate(sub_g.vs['label'])} for sub_g in list_subgraph]
+        
+        np_docsNsubtopic_rel = np.zeros( (doc_size, subtopic_size) )        
         for i, (keyword2weight_indoc, edge2weight_indoc) in enumerate(zip(list_keyword2weight_indocs, list_edge2weight_indocs)):
             for j, (keyword2weight_insubtopic, edge2weight_insubtopic) in enumerate(zip(list_keyword2weight_insubtopics, list_edge2weight_insubtopics)):
                 if select_rel == 0:
@@ -90,6 +99,25 @@ class Relevance:
                 elif select_rel == 3:
                     np_docsNsubtopic_rel[i][j] = self.Relevance_BM25_Graph(keyword2weight_indoc, keyword2weight_insubtopic, keyword2df, 
                                      edge2weight_indoc, edge2weight_insubtopic, doc_size, avg_keywords_len, idx2edge)
+                elif select_rel == 4:
+                    total_sum = 0
+                    for keyidx in keyword2weight_indoc.keys():
+                        if keyidx in list_subgraph_idx[j]:
+                            total_sum += list_graph_rel[j][list_subgraph_idx[j][keyidx]]
+                    np_docsNsubtopic_rel[i][j] = total_sum
+                elif select_rel == 5:
+                    total_sum = 0
+                    for keyidx in keyword2weight_indoc.keys():
+                        if keyidx in list_subgraph_idx[j]:
+                            total_sum += list_graph_rel[j][list_subgraph_idx[j][keyidx]]
+                    np_docsNsubtopic_rel[i][j] = total_sum
+                elif select_rel == 6:
+                    total_sum = 0
+                    for keyidx in keyword2weight_indoc.keys():
+                        if keyidx in list_subgraph_idx[j]:
+                            total_sum += list_graph_rel[j][list_subgraph_idx[j][keyidx]]
+                    np_docsNsubtopic_rel[i][j] = total_sum
+                    
         self.np_docsNsubtopic_rel = np_docsNsubtopic_rel
     
     def ExtractRepresentative(self):   
@@ -97,19 +125,26 @@ class Relevance:
 
         doc_size = self.np_docsNsubtopic_rel.shape[0]
         community_size = self.np_docsNsubtopic_rel.shape[1]
+        
+        def softmax(x):
+            """Compute softmax values for each sets of scores in x."""
+            e_x = np.exp(x - np.max(x, axis=1).reshape(x.shape[0], 1))
+            return e_x / e_x.sum(axis=1).reshape(x.shape[0], 1)
+        
+        np_norm_docsNsubtopic_rel = softmax(self.np_docsNsubtopic_rel)
 
         temp_idx_community = []
         # First, Sort relevance matrix with relevance score
         for i in range(community_size):
             idx_sorted_document = [i for i in range(doc_size)]
-            idx_sorted_document = sorted(idx_sorted_document, key=lambda x:self.np_docsNsubtopic_rel[x,i],reverse=True)
+            idx_sorted_document = sorted(idx_sorted_document, key=lambda x:np_norm_docsNsubtopic_rel[x,i], reverse=True)
+            
+            # Filtering with threshold
+            idx_temp_sorted_document = [x for x in idx_sorted_document if np_norm_docsNsubtopic_rel[x,i] > 0.5 ]
+            
 #             temp_idx_community.append(idx_sorted_document)
-            list_docidx_insubtopics.append(idx_sorted_document)
-
-#         # Second, Normalize sorted relevance score of each community in a document
-#         temp_value = np.sum(self.np_docsNsubtopic_rel, axis=1).reshape(doc_size, 1)
-#         np_norm_docsNsubtopic_rel = self.np_docsNsubtopic_rel / temp_value
-
+            list_docidx_insubtopics.append(idx_temp_sorted_document)
+    
 #         # Third, Sort processed relevance matrix with normalized and sorted relevance score
 #         for i in range(community_size):
 #             idx_sorted_document = temp_idx_community[i]

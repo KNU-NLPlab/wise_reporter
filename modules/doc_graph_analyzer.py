@@ -67,11 +67,17 @@ class DocGraphAnalyzer():
         _ = docgraph_obj.FindCommunity(opt, hierarchy, cutting_level)
         docgraph_obj.SetSubgraphdata(raw_doc_obj.keywordidx2frequency, raw_doc_obj.edge2idx, raw_doc_obj.edgeidx2frequency)
         
-        rel_e = 1
+        rel_e = 4
         relevance_obj = Relevance()
-        relevance_obj.CalculateRelevance(raw_doc_obj.list_keyword2freq_indocuments, docgraph_obj.list_keyword2freq_insubtopics,
-                                     raw_doc_obj.keyword2df, raw_doc_obj.list_edge2freq_indocuments, docgraph_obj.list_edge2freq_insubtopics,
-                                     raw_doc_obj.avg_keywords_len, raw_doc_obj.idx2edge, select_rel=rel_e)
+        relevance_obj.CalculateRelevance(raw_doc_obj.list_keyword2freq_indocuments, 
+                                         docgraph_obj.list_keyword2freq_insubtopics,
+                                         raw_doc_obj.keyword2df, raw_doc_obj.list_edge2freq_indocuments, 
+                                         docgraph_obj.list_edge2freq_insubtopics,
+                                         raw_doc_obj.avg_keywords_len, 
+                                         raw_doc_obj.idx2edge, 
+                                         docgraph_obj.list_subgraph,
+                                         select_rel=rel_e
+                                         )
         relevance_obj.ExtractRepresentative()
         
         ## modified by sspark ##
@@ -84,7 +90,7 @@ class DocGraphAnalyzer():
                                 docgraph_obj.list_community, raw_doc_obj.edgeidx2frequency, docgraph_obj.list_keyword2freq_insubtopics,
                                 docgraph_obj.list_edge2freq_insubtopics, relevance_obj.docidx_insubtopics,
                                 raw_doc_obj.idx2keyword, raw_doc_obj.idx2edge, 
-                                docgraph_obj.org_subtopic_size, docgraph_obj.cut_subtopic_size)
+                                docgraph_obj.org_subtopic_size, docgraph_obj.cut_subtopic_size, docgraph_obj.list_uppergraph)
         
         self.raw_doc_obj = raw_doc_obj
         self.docgraph_obj = docgraph_obj
@@ -100,9 +106,17 @@ class DocGraphAnalyzer():
         print('Node # : {}'.format(len(raw_doc_obj.idx2keyword)))
         print('Edge # : {}\n'.format(len(raw_doc_obj.idx2edge)))
         
-        zipped_data = zip(docgraph_obj.list_community, self.top_keyword_list)
-        for (comm_word_list, comm_idx), top_keywords in zipped_data:
-            print('Community {} : {:4} Keyword, ({})'.format(comm_idx, len(comm_word_list), '/'.join(top_keywords)))
+        cnt_uppergraph = 0
+        
+        zipped_data = zip(docgraph_obj.list_community, self.top_keyword_list, self.top_doc_id_list)
+        for i, ((comm_word_list, comm_idx), top_keywords, top_docs) in enumerate(zipped_data):
+            if len(top_docs) == 0: continue                            
+#             if cnt_uppergraph < len(analsis_obj.top_keyword_upperlevel) and comm_idx.startswith(analsis_obj.top_keyword_upperlevel[cnt_uppergraph][1]):
+#                 print('[*]', '/'.join( [ raw_doc_obj.idx2keyword[e] for e in analsis_obj.top_keyword_upperlevel[cnt_uppergraph][0] ] ) )                
+#                 cnt_uppergraph += 1
+                
+            print('[{}] Community {} : {:4} Keyword, ({}), len_topdocs : {}, topdoc 5 : {}'.format(
+                i, comm_idx, len(comm_word_list), '/'.join(top_keywords), len(top_docs), top_docs[:5] ))
         print()
             
     def make_viz_data(self, top_doc_info_list, node_cut=50, edge_cut=20, file_name='detail.json'):

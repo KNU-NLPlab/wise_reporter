@@ -17,18 +17,38 @@ class Analysis:
                     list_community, edgeidx2freq, keyidx2freq_insubtopics,
                     edgeidx2freq_insubtopics, docidx_insubtopics, 
                     idx2keyword, idx2edge,
-                    org_subtopic_num, cut_subtopic_num):
+                    org_subtopic_num, cut_subtopic_num,
+                   list_uppergraph):
             
         self.relevance_indocs = np_docsNsubtopics_rel.tolist()        
         
+        ## modified by sspark ##
         ## 서브토픽안의 Top Keyword
         self.sorted_keyword_insubtopics = []
-        for idx in range(len(list_community)):
+        for idx in range(len(communities_subgraph)):
             # betweenness, closeness, eigenvector_centrality, 
             keyword_score_pair_list = list(zip(communities_subgraph[idx].betweenness(),
-                                               [idx for idx in list_community[idx][0]]))
+                                               communities_subgraph[idx].vs['label']))
+#                                               [idx for idx in list_community[idx][0]]))
             self.sorted_keyword_insubtopics.append([word for score, word in sorted(keyword_score_pair_list, key=itemgetter(0), reverse=True)])
         self.top_keyword_insubtopics = [keyword_list[:opt.top_keyword_num] for keyword_list in self.sorted_keyword_insubtopics]
+        ## modified by sspark ##
+        
+        ## modified by sspark ##
+        ## 서브토픽안의 Top Keyword
+        sorted_keyword_inuppergraphes = []
+        for idx in range(len(list_uppergraph)):
+            # betweenness, closeness, eigenvector_centrality, 
+            keyword_score_pair_list = list(zip(list_uppergraph[idx][0].betweenness(),
+                                               list_uppergraph[idx][0].vs['label']))
+            sorted_keyword_inuppergraphes.append(
+                ([word for score, word in sorted(keyword_score_pair_list, key=itemgetter(0), reverse=True)],
+                 list_uppergraph[idx][1])
+                )
+        self.top_keyword_upperlevel = []
+        for keyword_list, comm_str in sorted_keyword_inuppergraphes:
+            self.top_keyword_upperlevel.append( (keyword_list[:opt.top_keyword_num], comm_str) ) 
+        ## modified by sspark ##
 
         ## 서브토픽안의 Top Edge
         top_edge_insubtopics = []
@@ -42,7 +62,10 @@ class Analysis:
                
         top_docidx_insubtopics = []
         for docidxs in docidx_insubtopics:
-            top_docidx_insubtopics.append(docidxs[:opt.top_doc_num])       
+            # top_docidx_insubtopics.append(docidxs[:opt.top_doc_num])
+            ## modified by sspark ##            
+            top_docidx_insubtopics.append(docidxs)
+            ## modified by sspark ##
             
         self.top_edge_insubtopics = top_edge_insubtopics
         self.top_docidx_insubtopics = top_docidx_insubtopics

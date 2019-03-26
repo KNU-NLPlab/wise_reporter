@@ -30,20 +30,25 @@ class DocumentGraph:
         
         list_community = []
         list_subgraph = []
-        list_org_subtopic_size = []        
+        list_uppergraph = []
+        list_org_subtopic_size = []
+        
         if not len(list_cnt_level) + 1 < cutting_level:
-            list_org_subtopic_size.append( len(community) )
+            list_org_subtopic_size.append( len(community) )            
+        if len(list_cnt_level) != 0:
+            list_uppergraph.append( (obj_graph, "/".join(list_cnt_level) ) )
             
-        for i, (a_subgraph, list_keyword) in enumerate(zip(community.subgraphs(), community)):
+        for i, (a_subgraph, list_keyword) in enumerate(zip(community.subgraphs(), community) ):
             if len(list_keyword) < min_keyword: continue
             
-            if len(list_cnt_level) + 1 < cutting_level:                
-                list_temp_community, list_temp_subgraph, list_temp_org_subtopic_size = self.RecursiveCommunity(a_subgraph,
+            if len(list_cnt_level) + 1 < cutting_level:
+                list_temp_community, list_temp_subgraph, list_temp_org_subtopic_size, list_temp_uppergraph = self.RecursiveCommunity(a_subgraph,
                                                                                                               cutting_level,
                                                                                                               list_cnt_level + [str(i)],
                                                                                                               min_keyword)
                 list_community.extend(list_temp_community)
                 list_subgraph.extend(list_temp_subgraph)
+                list_uppergraph.extend(list_temp_uppergraph)
                 list_org_subtopic_size.extend(list_temp_org_subtopic_size)
             else:
                 self.org_subtopic_size = len(community)
@@ -51,7 +56,7 @@ class DocumentGraph:
                 list_subgraph.append( a_subgraph )
                 
         
-        return list_community, list_subgraph, list_org_subtopic_size
+        return list_community, list_subgraph, list_org_subtopic_size, list_uppergraph
     ## modified by sspark ##
     
     ## modified by sspark ##
@@ -60,11 +65,12 @@ class DocumentGraph:
     def FindCommunity(self, opt, hierarchy, cutting_level):
         
         if hierarchy is True:
-            list_community, list_subgraph, list_org_subtopic_size = self.RecursiveCommunity(obj_graph=self.obj_graph,
+            list_community, list_subgraph, list_org_subtopic_size, list_uppergraph = self.RecursiveCommunity(obj_graph=self.obj_graph,
                                                                                             cutting_level=cutting_level,
                                                                                             min_keyword=opt.min_keyword)
             self.list_community = list_community
             self.list_subgraph = list_subgraph
+            self.list_uppergraph = list_uppergraph
             self.org_subtopic_size = sum(list_org_subtopic_size)
             self.cut_subtopic_size = len(self.list_community)
         else:
