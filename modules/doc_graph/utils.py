@@ -148,6 +148,3 @@ def ParseOption(parser):
     group.add_argument('-word_check', action="store_true", default=True, help='') 
     
     return parser.parse_args()
-
-def make_morp_sentence_list(etri_dict):
-    return [' '.join([morp['lemma'] for morp in sentence['morp']]) for sentence in etri_dict['sentence']]

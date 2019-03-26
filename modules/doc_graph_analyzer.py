@@ -40,10 +40,10 @@ class DocGraphAnalyzer(BaseModule):
 
     def process_data(self, doc_info_list, top_doc_num=10, top_keyword_num=10):
         '''
-        Overwrited method from BaseModule class
+        Overrided method from BaseModule class
         Extract top keyword and document id in several subtopics
         Args:
-            doc_info_list (list): list of document information dictionary
+            doc_info_list (list): a list of document information dictionary
             top_doc_num (int): the number of documents to retrieve
             top_keyword_num (int): the number of keywords to retrieve
         '''
@@ -100,14 +100,17 @@ class DocGraphAnalyzer(BaseModule):
             print('Community {} : {:4} Keyword, ({})'.format(comm_idx, len(comm_word_list), '/'.join(top_keywords)))
         print()
             
-    def generate_json(self, top_doc_info_list, node_cut=50, edge_cut=20):
+    def get_viz_json(self, top_doc_info_list, node_cut=50, edge_cut=20):
         '''
-        Overwrited method from BaseModule class
-        Generate json dict and put it in own json attribute(self.main_json, self.detailed_json)
+        Overrided method from BaseModule class
+        Generate json dicts for main page and detailed page and return them
         Args:
             top_doc_info_list (list): list of top document information dictionary
             node_cut (int): the maximum number of nodes to use for each cluster in visualization
             edge_cut (int): the maximum number of edges to use for each cluster in visualization
+        Return:
+            main_json
+            detail_json
         '''        
         def verticesInSameCommunity(v1, v2):
             v1_comm = None
@@ -164,9 +167,11 @@ class DocGraphAnalyzer(BaseModule):
         print('Viz Node # : ', len(node_info))
         print('Viz Edge # : ', len(edge_info))
         
-        self.main_json = [min([doc_info['newsTitle'][:re.search('$|[\.…]', doc_info['newsTitle']).start()].strip()
-                               for doc_info in doc_info_list], key=len) for doc_info_list in top_doc_info_list]
-        self.detailed_json = json_data
+        main_json = [min([doc_info['newsTitle'][:re.search('$|[\.…]', doc_info['newsTitle']).start()].strip()
+                          for doc_info in doc_info_list], key=len) for doc_info_list in top_doc_info_list]
+        detail_json = json_data
+        
+        return (main_json, detail_json)
         
     def make_summary(self, file_name='summary.txt', title=True, content=False):
         with open(os.path.join(self.output_path, file_name), 'w', encoding='utf8') as fp:
