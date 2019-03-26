@@ -1,14 +1,11 @@
 # wise_reporter
 
-임시
+## 임시
+\test.ipynb 참조(https://github.com/KNU-NLPlab/wise_reporter/blob/master/test.ipynb)
 
-Scouter 사용법
-Keyword를 Query로 newspaper index에서 가져오는 소스
-
-```
-from modules.scouter_handler import ScouterHandler
-
-scouter = ScouterHandler()
-query_body = scouter.make_keyword_query_body("문재인 대통령")
-scouter.search(query_body, data_type="newspaper")
-```
+## 모듈 현황 및 Refactoring 진행 상황
+1. Document Graph Analyzer
+2. Multi Document Summarizer
+3. ~~~Timeline Summarizer~~~
+4. ~~~Image Retriever~~~
+5. ~~~Image Caption Generater~~~
