@@ -16,6 +16,46 @@ from modules.timeline_summ import makeSummary
 from modules.timeline_sum.cleanDirectory import cleanDirectory
 
 
+class MultiDocSummary(BaseModule):
+    '''
+    Analyzer class to detect keyword set of communities in the graph of documents
+    Args:
+        topic (string): a keyword query
+        df_bound (tuple of float): a lower and upper bound for keyword preprocessing
+        min_keyword (int): a bound to use a community as a cluster
+    '''
+    def __init__(self, topic):
+        self.topic = topic
+
+    def process_data(self, top_doc_morph_sentence_list, top_keyword_list):
+        '''
+        Overrided method from BaseModule class
+        Extract top keyword and document id in several subtopics
+        Args:
+            top_doc_morph_sentence_list (list): a list of morph sentences in top documents
+            top_keyword_list (list): a list of keywords of top documents
+        '''
+        data_list = stc_extract(self.topic, top_keyword_list, top_doc_morph_sentence_list) #파라메터 추가
+        
+        print("paraent pid", os.getpid())
+        ctx = mp.get_context('spawn')
+        queue = ctx.Queue()
+        p = ctx.Process(target=make_summary, args=(queue, self.topic, data_list))
+        p.start()
+        
+        self.main_json, self.detail_json = queue.get()
+    
+        #p.join(3) # timeout 안 설정하면 안끝남
+        
+    def generate_json(self):
+        '''
+        Overrided method from BaseModule class
+        Generate json dict and 
+        Args:
+        '''
+        return self.main_josn, self.detail_json
+    
+    
 def summarization(doc_save_list, outPath, query, timeline_threshold=0.3, phrase_threshold=17) :
     start_time = time.time()
     dataCommonPath = outPath
