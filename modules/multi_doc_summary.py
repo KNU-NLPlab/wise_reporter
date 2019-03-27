@@ -1,5 +1,6 @@
 import os
 
+import multiprocessing as mp
 from modules.base_module import BaseModule
 
 from modules.multi_summ.main import stc_extract, make_summary
@@ -27,7 +28,7 @@ class MultiDocSummary(BaseModule):
         print("paraent pid", os.getpid())
         ctx = mp.get_context('spawn')
         queue = ctx.Queue()
-        p = ctx.Process(target=make_summary, args=(queue, keyword, data_list))
+        p = ctx.Process(target=make_summary, args=(queue, self.topic, data_list))
         p.start()
         
         self.main_json, self.detail_json = queue.get()
