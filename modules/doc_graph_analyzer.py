@@ -42,7 +42,7 @@ class DocGraphAnalyzer():
         if os.path.exists(self.output_path) == False:
             os.makedirs(self.output_path)
 
-    def extract_subtopic_info(self, doc_info_list, top_doc_num=10, top_keyword_num=10, hierarchy=True, cutting_level=2):
+    def extract_subtopic_info(self, doc_info_list, dict_newid2title, top_doc_num=10, top_keyword_num=10, hierarchy=True, cutting_level=2):
         '''
         Extract top keyword and document id in several subtopics
         Args:
@@ -74,13 +74,14 @@ class DocGraphAnalyzer():
 
         rel_e = 0
         relevance_obj = Relevance()
-        np_docsNsubtopic_rel, list_subgkey = relevance_obj.CalculateRelevance(raw_doc_obj.list_keyword2freq_indocuments,
-                                                                              dict_subgraph,
-                                                                              cutting_level,
-                                                                              select_rel=rel_e
-                                                                              )
-        dict_subgraph = relevance_obj.ExtractRepresentative(np_docsNsubtopic_rel, list_subgkey, dict_subgraph)
-        relevance_obj.SetVariable(opt, dict_subgraph)
+        for i in range(1, cutting_level+1):
+            np_docsNsubtopic_rel, list_subgkey = relevance_obj.CalculateRelevance(raw_doc_obj.list_keyword2freq_indocuments,
+                                                                                  dict_subgraph,
+                                                                                  cutting_level=i,
+                                                                                  select_rel=rel_e
+                                                                                  )
+            dict_subgraph = relevance_obj.ExtractRepresentative(np_docsNsubtopic_rel, list_subgkey, dict_subgraph, doc_id_list)
+            relevance_obj.SetVariable(opt, dict_subgraph, list_subgkey, dict_newid2title)
 
         self.raw_doc_obj = raw_doc_obj
         self.docgraph_obj = docgraph_obj
@@ -94,19 +95,14 @@ class DocGraphAnalyzer():
         for subgkey in sorted(dict_subgraph.keys()):
             a_subgraph = dict_subgraph[subgkey]
             list_keywords = [raw_doc_obj.idx2keyword[a_keyword] for a_keyword in a_subgraph['keywords']]
-            if len(subgkey.split('/')) == cutting_level:
-                dict_subgraph[subgkey]['documents'] = [doc_id_list[doc_idx] for doc_idx in
-                                                       dict_subgraph[subgkey]['documents']]
-                print('{}Leaf Community {} : {:4} Keywords, ({}) top5 documents, ({})'.format(
-                    '\t' * (len(subgkey.split('/')) - 1), subgkey, a_subgraph['volume'], '/'.join(list_keywords),
-                    str(a_subgraph['documents'][:5])
+            
+            print('{}Leaf Community {} : {:4} Keywords, ({})'.format(
+                '\t' * (len(subgkey.split('/')) - 1), subgkey, a_subgraph['volume'], '/'.join(list_keywords)
                 )
-                )
-            else:
-                print('{}Community {} : {:4} Keywords, ({})'.format(
-                    '\t' * (len(subgkey.split('/')) - 1), subgkey, a_subgraph['volume'], '/'.join(list_keywords)
-                )
-                )
+            )
+            for a_title in a_subgraph['titles']:
+                print("{} {}".format('\t' * (len(subgkey.split('/')) - 1), a_title) )
+            
         ## modified by sspark ##
 
     ## modified by sspark ##
@@ -120,7 +116,7 @@ class DocGraphAnalyzer():
         dict_result_subgraph = dict()
         for subgkey in dict_subgraph.keys():
             a_subgraph = dict_subgraph[subgkey]
-            dict_result_subgraph[subgkey] = {key: a_subgraph[key] for key in a_subgraph.keys() if key != 'graph'}
+            dict_result_subgraph[subgkey] = {key: a_subgraph[key] for key in a_subgraph.keys() if key != 'graph' if key != 'titles'}
 
         with open(json_path, 'w', encoding='utf-8') as fw:
             json.dump(dict_result_subgraph, fw)

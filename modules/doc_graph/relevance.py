@@ -107,19 +107,19 @@ class Relevance:
                     total_sum = 0
                     for keyidx in keyword2weight_indoc.keys():
                         if keyidx in list_subgraphidx2idx[j]:
-                            total_sum += list_graph_rel[j][list_subgraphidx2idx[j][keyidx]]
+                            total_sum += list_graph_rel[j][list_subgraphidx2idx[j][keyidx]] * keyword2weight_indoc[keyidx]
                     np_docsNsubtopic_rel[i][j] = total_sum
                 elif select_rel == 1:
                     total_sum = 0
                     for keyidx in keyword2weight_indoc.keys():
                         if keyidx in list_subgraphidx2idx[j]:
-                            total_sum += list_graph_rel[j][list_subgraphidx2idx[j][keyidx]]
+                            total_sum += list_graph_rel[j][list_subgraphidx2idx[j][keyidx]] * keyword2weight_indoc[keyidx]
                     np_docsNsubtopic_rel[i][j] = total_sum
                 elif select_rel == 2:
                     total_sum = 0
                     for keyidx in keyword2weight_indoc.keys():
                         if keyidx in list_subgraphidx2idx[j]:
-                            total_sum += list_graph_rel[j][list_subgraphidx2idx[j][keyidx]]
+                            total_sum += list_graph_rel[j][list_subgraphidx2idx[j][keyidx]] * keyword2weight_indoc[keyidx]
                     np_docsNsubtopic_rel[i][j] = total_sum
 
         self.np_docsNsubtopic_rel = np_docsNsubtopic_rel
@@ -127,7 +127,7 @@ class Relevance:
 
     ## modified by sspark ##
 
-    def ExtractRepresentative(self, np_docsNsubtopic_rel, list_subgkey, dict_subgraph, do_softmax=False):
+    def ExtractRepresentative(self, np_docsNsubtopic_rel, list_subgkey, dict_subgraph, doc_id_list, do_softmax=False):
         list_docidx_insubtopics = []
 
         doc_size = np_docsNsubtopic_rel.shape[0]
@@ -140,8 +140,8 @@ class Relevance:
                 return e_x / e_x.sum(axis=1).reshape(x.shape[0], 1)
 
             np_temp_docsNsubtopic_rel = softmax(np_docsNsubtopic_rel)
-        else:
-            np_temp_docsNsubtopic_rel = np_docsNsubtopic_rel
+        else:            
+            np_temp_docsNsubtopic_rel = np_docsNsubtopic_rel / np.sum(np_docsNsubtopic_rel, axis=1).reshape(doc_size, 1)
 
         # First, Sort relevance matrix with relevance score
         for i in range(community_size):
@@ -150,20 +150,21 @@ class Relevance:
                                          reverse=True)
 
             subkey = list_subgkey[i]
-            dict_subgraph[subkey]['documents'] = [x for x in idx_sorted_document]
+            dict_subgraph[subkey]['documents'] = [doc_id_list[x] for x in idx_sorted_document]
             dict_subgraph[subkey]['docs_rel'] = [np_temp_docsNsubtopic_rel[x, i] for x in idx_sorted_document]
-
+    
         return dict_subgraph
+    ## modified by sspark ##
+    
+    ## modified by sspark ##
+    def SetVariable(self, opt, dict_subgraph, list_subgkey, dict_newid2title):
 
-        ## modified by sspark ##
-
-    def SetVariable(self, opt, dict_subgraph):
-
-        for subgkey in dict_subgraph.keys():
+        for subgkey in list_subgkey:
             a_graph = dict_subgraph[subgkey]['graph']
             list_score_keyword_pair = list(zip(a_graph.betweenness(), a_graph.vs['label']))
             sortedlist_score_keyword_pair = [word for score, word in
                                              sorted(list_score_keyword_pair, key=itemgetter(0), reverse=True)]
             dict_subgraph[subgkey]['keywords'] = sortedlist_score_keyword_pair[:opt.top_keyword_num]
             dict_subgraph[subgkey]['volume'] = len(a_graph.vs['label'])
-        ## modified by sspark ##
+            dict_subgraph[subgkey]['titles'] = [dict_newid2title[newsid] for newsid in dict_subgraph[subgkey]['documents'][:5]]
+    ## modified by sspark ##
