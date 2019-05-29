@@ -6,7 +6,7 @@
 ## 모듈 현황 및 Refactoring 진행 상황
 1. Document Graph Analyzer
 2. Multi Document Summarizer
-3. ~~Timeline Summarizer~~
+3. Timeline Summarizer
 4. ~~Image Retriever~~
 5. ~~Image Caption Generater~~
 
