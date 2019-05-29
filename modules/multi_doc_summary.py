@@ -12,8 +12,8 @@ class MultiDocSummary(BaseModule):
     Args:
         topic (string): a keyword query
     '''
-    def __init__(self, topic):
-        self.topic = topic
+    def __init__(self, topic, out_path):
+        super(MultiDocSummary, self).__init__(topic, out_path)
 
     def process_data(self, top_doc_morph_sentence_list, top_keyword_list):
         '''
@@ -41,4 +41,4 @@ class MultiDocSummary(BaseModule):
         Return two json dictionary for visualization
         Args:
         '''
-        return self.main_josn, self.detail_json
+        return self.main_json, self.detail_json

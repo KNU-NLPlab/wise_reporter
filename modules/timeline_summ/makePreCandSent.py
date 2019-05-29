@@ -113,6 +113,7 @@ def getKeyword(keywords, sentenceSets, queryWordSet, threshold, alpha) :
             if swt == 1 and inforScore < minScore :
                 continue
 
+            # 문장 개수 조절할 수 있는 Threshold. 늘이면 속도 증가
             if len(candidates) < 5 :
                 candidates[sentence] = {'inforScore' : inforScore, 'morphs' : morphs, 'keyword' : words, 'relation' : relation, 'dependency' : dependency}
                 scoreSet.append(inforScore)

@@ -22,8 +22,9 @@ class DocGraphAnalyzer(BaseModule):
         df_bound (tuple of float): a lower and upper bound for keyword preprocessing
         min_keyword (int): a bound to use a community as a cluster
     '''
-    def __init__(self, topic, df_bound=(0.02, 0.70), min_keyword=20):
-        self.topic = topic
+    def __init__(self, topic, out_path, df_bound=(0.02, 0.70), min_keyword=20):
+        super(DocGraphAnalyzer, self).__init__(topic, out_path)
+        
         self.df_bound = df_bound
         
         self.min_keyword = min_keyword

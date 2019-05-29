@@ -2,7 +2,7 @@ import sys
 
 from elasticsearch import Elasticsearch
 
-from modules.scouter.config import default_addr, default_size, default_scroll
+from modules.scouter.config import *
 
 class ScouterHandler():
     '''

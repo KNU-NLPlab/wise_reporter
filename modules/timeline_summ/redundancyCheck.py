@@ -49,6 +49,7 @@ def main(dirPath) :
 	candidateMorphSets = {}
 
 	for path, dir, files in os.walk(candPath):
+		print("len(files) : ", len(files))
 		for file in files:
 			# load sentence
 			morphAnalysis = {}
@@ -126,6 +127,7 @@ def main(dirPath) :
 	cleanDirectory(copycandPath)
 
 	for date, sents in refineCandidateMorphSets.items():
+		print("len(sents) : ", len(sents))
 		for sent in sents :
 			fname = date + '_' + str(sent[1])+'.txt'
 			copyfile(originPath+fname, copyoriginPath+fname)
