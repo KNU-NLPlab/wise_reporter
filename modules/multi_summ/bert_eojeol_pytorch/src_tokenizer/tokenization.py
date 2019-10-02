@@ -14,9 +14,6 @@
 # limitations under the License.
 #
 #
-# 한국어 WordPiece 단위 BERT를 위한 Tokenization Class
-# 수정: joonho.lim
-# 일자: 2019-05-23
 #
 """Tokenization classes."""
 
