@@ -2,7 +2,7 @@
 import torch.nn as nn
 import torch
 import pickle
-from pytorch_pretrained_bertt import BertModel, BertTokenizer
+from pytorch_pretrained_bertt import BertModel, BertTokenizer, BertConfig
 
 class Adapter(nn.Module):
     def __init__(self, dim, down_dim):
@@ -36,7 +36,7 @@ class NMTModel(nn.Module):
         # 기본 128
         down = 128
         # self.encoder = BertModel.from_pretrained('bert-base-uncased').to('cuda')
-        self.encoder = BertModel.from_pretrained('./bert_eojeol_pytorch')
+        self.encoder = BertModel(BertConfig.from_json_file('./bert_eojeol_pytorch/bert_config.json'))
         # self.encoder = BertModel.from_pretrained('./models/korean_bert')
         for i, _ in enumerate(self.encoder.parameters()):
             _.requires_grad = False
