@@ -21,5 +21,6 @@ modules의 이미 구현된 다른 모듈(1, 2번 Module)들을 참고하시면 
 ## 문의사항
 
 최우용 석사과정 (wychoi@sejong.knu.ac.kr) 에게 문의바랍니다.
+
 다중문서요약 모델 관련해서는 신용민 석사과정 (ymshin@sejong.knu.ac.kr) 에게 문의바랍니다.
 
