@@ -14,6 +14,7 @@ from modules.timeline_summ import getKeyword
 from modules.timeline_summ import makePreCandSent
 from modules.timeline_summ import redundancyCheck
 from modules.timeline_summ import makeSummary
+from modules.timeline_summ import abstractiveSumm
 
 from modules.timeline_summ.cleanDirectory import cleanDirectory
 
@@ -108,4 +109,8 @@ class TimelineSummary(BaseModule):
 
         cleanDirectory(tempDic)
 
-        return summary, beam_search
+        # E. abstracitveSumm
+        dates, summSentences = abstractiveSumm.main(summary)
+
+
+        return dates, summSentences
