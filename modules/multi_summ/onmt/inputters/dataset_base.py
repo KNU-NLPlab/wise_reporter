@@ -1,0 +1,155 @@
+# coding: utf-8
+
+from itertools import chain, starmap
+from collections import Counter
+
+import torch
+from torchtext.data import Example, Dataset
+from torchtext.vocab import Vocab
+# import re
+# filter = re.compile('/[A-Za-z]*')
+import nltk
+
+class DatasetBase(Dataset):
+    """
+    A dataset is an object that accepts sequences of raw data (sentence pairs
+    in the case of machine translation) and fields which describe how this
+    raw data should be processed to produce tensors. When a dataset is
+    instantiated, it applies the fields' preprocessing pipeline (but not
+    the bit that numericalizes it or turns it into batch tensors) to the raw
+    data, producing a list of torchtext.data.Example objects. torchtext's
+    iterators then know how to use these examples to make batches.
+
+    Datasets in OpenNMT take three positional arguments:
+
+    Args:
+    `fields`: a dict with the structure returned by inputters.get_fields().
+        keys match the keys of items yielded by the src_examples_iter or
+        tgt_examples_iter, while values are lists of (name, Field) pairs.
+        An attribute with this name will be created for each Example object,
+        and its value will be the result of applying the Field to the data
+        that matches the key. The advantage of having sequences of fields
+        for each piece of raw input is that it allows for the dataset to store
+        multiple `views` of each input, which allows for easy implementation
+        of token-level features, mixed word- and character-level models, and
+        so on.
+    `src_examples_iter`: a sequence of dicts. Each dict's keys should be a
+        subset of the keys in `fields`.
+    `tgt_examples_iter`: like `src_examples_iter`, but may be None (this is
+        the case at translation time if no target is specified).
+
+    `filter_pred` if specified, a function that accepts Example objects and
+        returns a boolean value indicating whether to include that example
+        in the dataset.
+
+    The resulting dataset will have three attributes (todo: also src_vocabs):
+
+     `examples`: a list of `torchtext.data.Example` objects with attributes as
+        described above.
+     `fields`: a dictionary whose keys are strings with the same names as the
+        attributes of the elements of `examples` and whose values are
+        the corresponding `torchtext.data.Field` objects. NOTE: this is not
+        the same structure as in the fields argument passed to the constructor.
+    """
+
+    def __init__(self, fields, readers, data, dirs, filter_pred=None, bert=False, morph=False, korean_subword=False):
+        dynamic_dict = 'src_map' in fields and 'alignment' in fields
+
+        read_iters = [r.read(dat[1], dat[0], dir_) for r, dat, dir_
+                      in zip(readers, data, dirs)]
+
+        # self.src_vocabs is used in collapse_copy_scores and Translator.py
+        self.src_vocabs = []
+        examples = []
+        for ex_dict in starmap(self._join_dicts, zip(*read_iters)):
+            if bert:
+                ex_dict['src'] = '[CLS] ' + ex_dict['src']
+                # ex_dict['src'] = ' [CLS] '.join(nltk.sent_tokenize(ex_dict['src']))
+            if morph:
+                ex_dict['src'] = '[CLS] ' + ex_dict['src']
+            if korean_subword:
+                ex_dict['src'] = '[CLS] ' + ex_dict['src']
+            if dynamic_dict:
+                src_field = fields['src'][0][1]
+                tgt_field = fields['tgt'][0][1]
+                # this assumes src_field and tgt_field are both text
+                src_vocab, ex_dict = self._dynamic_dict(
+                    ex_dict, src_field.base_field, tgt_field.base_field, bert=bert, morph=morph, korean_subword=korean_subword)
+                self.src_vocabs.append(src_vocab)
+            ex_fields = {k: v for k, v in fields.items() if k in ex_dict}
+
+            ex = Example.fromdict(ex_dict, ex_fields)
+            examples.append(ex)
+
+        # the dataset's self.fields should have the same attributes as examples
+        fields = dict(chain.from_iterable(ex_fields.values()))
+
+        super(DatasetBase, self).__init__(examples, fields, filter_pred)
+
+    def __getattr__(self, attr):
+        # avoid infinite recursion when fields isn't defined
+        if 'fields' not in vars(self):
+            raise AttributeError
+        if attr in self.fields:
+            return (getattr(x, attr) for x in self.examples)
+        else:
+            raise AttributeError
+
+    def save(self, path, remove_fields=True):
+        if remove_fields:
+            self.fields = []
+        torch.save(self, path)
+
+    def _join_dicts(self, *args):
+        """
+        Args:
+            dictionaries with disjoint keys.
+
+        Returns:
+            a single dictionary that has the union of these keys.
+        """
+        return dict(chain(*[d.items() for d in args]))
+
+    def _dynamic_dict(self, example, src_field, tgt_field, bert=False, morph=False, korean_subword=False):
+        ##########
+        # src_field.tokenize.keywords['truncate'] = 400
+        ##########
+        if bert:
+            src = src_field.tokenize.tokenize(example["src"])[:src_field.tokenizer_args[0].keywords['truncate']]
+            src_field.unk_token = '[UNK]'
+        elif morph:
+            # src = src_field.tokenize.tokenize(example["src"])[:src_field.tokenizer_args[0].keywords['truncate']]
+            src = example['src'].split()[:src_field.tokenize.keywords['truncate']]
+            src_field.unk_token = '[UNK]'
+            # src = src_field.tokenize(example["src"])
+        elif korean_subword:
+            src = src_field.tokenize.tokenize(example["src"])[:src_field.tokenizer_args[0].keywords['truncate']]
+            src_field.unk_token = '[UNK]'
+        else:
+            try:
+                src = src_field.tokenize(example["src"])
+                src_field.unk_token = '[UNK]'
+            except TypeError:
+                src = src_field.tokenize.tokenize(example["src"])[:src_field.tokenizer_args[0].keywords['truncate']]
+                src_field.unk_token = '[UNK]'
+        # make a small vocab containing just the tokens in the source sequence
+        unk = src_field.unk_token
+        pad = src_field.pad_token
+        src_vocab = Vocab(Counter(src), specials=[unk, pad])
+        # Map source tokens to indices in the dynamic dict.
+        src_map = torch.LongTensor([src_vocab.stoi[w] for w in src])
+        example["src_map"] = src_map
+
+        if "tgt" in example:
+            if bert:
+                tgt = ['</t>' if b == '二' else b for b in ['<t>' if a == '金' else a for a in tgt_field.tokenize.tokenize(example["tgt"].replace('<t>', '金').replace('</t>', '二'))[:tgt_field.tokenizer_args[0].keywords['truncate']]]]
+            elif morph:
+                tgt = example["tgt"].split()[:tgt_field.tokenize.keywords['truncate']]
+            elif korean_subword:
+                tgt = tgt_field.tokenize.tokenize(example["tgt"])[:tgt_field.tokenizer_args[0].keywords['truncate']]
+            else:
+                tgt = tgt_field.tokenize(example["tgt"])
+            mask = torch.LongTensor(
+                [0] + [src_vocab.stoi[w] for w in tgt] + [0])
+            example["alignment"] = mask
+        return src_vocab, example
