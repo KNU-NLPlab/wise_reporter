@@ -21,9 +21,15 @@ import PIL.Image as pilimg
 
 from scipy import spatial
 
-
 #---------image and title download--------------
 def image_caption_downloader(query, download_limit):
+    try:
+        if not(os.path.isdir('downloads')):
+            os.makedirs(os.path.join('downloads'))
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            print("Failed to create directory!!!!!")
+            raise
     file_list= [] # only file name
     image_list = [] # path + file name 
     caption_list = []
