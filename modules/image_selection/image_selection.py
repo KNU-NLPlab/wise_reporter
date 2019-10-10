@@ -28,7 +28,7 @@ def image_caption_downloader(query, download_limit):
             os.makedirs(os.path.join('downloads'))
     except OSError as e:
         if e.errno != errno.EEXIST:
-            print("Failed to create directory!!!!!")
+            print("Failed to create directory")
             raise
     file_list= [] # only file name
     image_list = [] # path + file name 
