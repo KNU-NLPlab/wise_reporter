@@ -8,12 +8,10 @@ import tensorflow_hub as hub
 import numpy as np
 import tf_sentencepiece
 import os, re, glob
-import numpy as np
 import shutil
 from numpy import argmax
 from keras.models import load_model
 from PIL import Image
-import PIL.Image as pilimg
 from scipy import spatial
 
 
