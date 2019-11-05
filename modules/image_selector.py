@@ -12,9 +12,9 @@ class ImageSelectionModule(BaseModule):
             topic.append(self.topic)
         else:
             topic = self.topic
-        file_list, image_list, caption_list = image_caption_downloader(topic, download_limit)
-        nongraph_image_list, nongraph_caption_list = VGG_classifier(file_list, image_list, caption_list)
-        final_image = semantic_similarity_module(self.topic, nongraph_image_list, nongraph_caption_list)
+        file_list, image_list, caption_list = image_caption_downloader(topic, download_limit) # get candidate images and caption from google
+        nongraph_image_list, nongraph_caption_list = VGG_classifier(file_list, image_list, caption_list) # filter images using vgg classifier 
+        final_image = semantic_similarity_module(self.topic, nongraph_image_list, nongraph_caption_list) # get final image through semantic similarity measurement
         imgsave_path = image_save_path # path to save final recommended image
         temp_image = Image.open(final_image)
-        temp_image.save('%s%s'%(imgsave_path,final_image.split('/')[3]))                
+        temp_image.save('%s%s'%(imgsave_path,final_image.split('/')[3])) # save final recommended image to given path                
