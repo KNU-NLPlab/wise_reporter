@@ -110,7 +110,8 @@ class TimelineSummary(BaseModule):
         cleanDirectory(tempDic)
 
         # E. abstracitveSumm
-        dates, summSentences = abstractiveSumm.main(summary)
+        summary = abstractiveSumm.main(summary)
+        print("E : ", time.time()-start_time)
 
 
-        return dates, summSentences
+        return summary, beam_search

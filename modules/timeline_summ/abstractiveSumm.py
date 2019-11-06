@@ -1,44 +1,66 @@
+from __future__ import unicode_literals
 
-m modules.timeline_summ.tools import etri_nlp
-from modules.timeline_summ.tools import eventlist
+from onmt.translate.translator import build_translator
+import onmt.opts as opts
+from onmt.utils.parse import ArgumentParser
 
-from opennmt.onmt.translate.translator import make_translator
+import tools.etri_nlp as etri_nlp
 
-def get_morph_sentences(summary):
-    morph_sentences, date_list = [], []
-    for sentence in summary:
-        normal_sentence = sentence['article'][0]['sentence']
-        # make morph sentence
-        etri = etri_nlp.Etri_nlp()
-        parsed_json = etri.get_parsed_json(normal_sentence)
-        morph_sentence = etri.make_morh_sentence(parsed_json)
+def translate(sentences):
+    parser = ArgumentParser(description='translate.py')
 
-        # appending morph_sentence
-        morph_sentences.append(morph_sentence)
-        date_list.append(sentence['date'])
+    opts.config_opts(parser)
+    opts.translate_opts(parser)
 
-    return morph_sentences, date_list
+    opt = parser.parse_args(args="--src 1 --model ./model/deletion_model.pt")
 
-def get_event_tokens(morph_sentences):
-    event_tokens = []
-    event_list = eventlist.loadEventlist()
+    ArgumentParser.validate_translate_opts(opt)
 
-    for sentence in morph_sentences:
-        morph_words = sentence.split(' ')
-        event_token_list = []
-        for word in morph_words:
-            if word in event_list:
-                event_token_list.append('1')
-            else:
-                event_token_list.append('0')
-        event_tokens.append(' '.join(event_token_list))
-    return event_tokens
+    translator = build_translator(opt, report_score=False)
+
+    _, pred = translator.translate(
+        src=sentences,
+        batch_size=opt.batch_size,
+        batch_type=opt.batch_type,
+        attn_debug=opt.attn_debug
+    )
+    return pred
+
+def get_morph_sentences(sentence_list):
+    morph_sentences = []
+    for sentence in sentence_list:
+        morph_sentences.append(etri_nlp.get_morph_sentence(sentence))
+    return morph_sentences
+
+
+def binary_to_text(morph_sentences, pred_result):
+    result_sentence = []
+    for src, trg in zip(morph_sentences, pred_result):
+        temp = []
+        src = src.rstrip().split(' ')
+        trg = trg.rstrip().split(' ')
+        for i in range(len(src)):
+            try:
+                if trg[i] == '1':
+                    temp.append(src[i])
+            except:
+                pass
+        temp = ' '.join(temp)
+        result_sentence.append(temp)
+    return result_sentence
+
 
 def main(summary):
+    sentence_list = [sum['article'][0]['sentence'] for sum in summary]
+    morph_sentences = get_morph_sentences(sentence_list)
+    pred_result = translate(morph_sentences)
+    pred_result = [result[0] for result in pred_result]
+    translate_result = binary_to_text(morph_sentences, pred_result)
 
-    morph_sentences, date_list = get_morph_sentences(summary)
-    event_tokens = get_event_tokens(morph_sentences)
+    for sum, result in zip(summary, translate_result):
+        sum['article'][0]['sentence'] = result
+
+    return summary
 
 
 
-    return dates, summsentences

@@ -7,7 +7,6 @@ from collections import OrderedDict
 
 import peakutils
 
-import burst_detection as bd
 import numpy as np
 
 

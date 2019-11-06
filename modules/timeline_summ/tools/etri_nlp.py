@@ -14,7 +14,7 @@ from pip._vendor import urllib3
 try:
     from python_etri_nlp.etri_client import Etri_client
 except ImportError:
-    from etri_client import Etri_client
+    from modules.timeline_summ.tools.etri_client import Etri_client
 
 class Etri_nlp():
     def __init__(self, host_addr = "155.230.90.217", port_number = 5004, silence = False):
@@ -75,7 +75,7 @@ class Etri_nlp():
         return ' '.join(morp_element_list)
 
     def single_sent_morph(self, json_dict) :
-        return json_dict['sentence'][0]['morp_eval']
+        return json_dict['sentence'][0]['morp_eval']-
 
     # 17.12.02
     def get_noun_word(self, json_dict):
