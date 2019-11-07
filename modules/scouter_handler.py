@@ -35,7 +35,7 @@ class ScouterHandler():
         
         es_client = Elasticsearch(self.addr)
         response = es_client.search(index=data_type,
-                                    doc_type='text',
+                                    #doc_type='_doc',
                                     scroll=default_scroll,
                                     size=self.size if self.size < max_num_doc else max_num_doc,
                                     body=query_body)
