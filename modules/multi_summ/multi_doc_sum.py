@@ -41,7 +41,7 @@ class mds():
         opt.gpu = 0
 
         logger = init_logger(opt.log_file)
-        translator = build_translator(opt, report_score=True)
+        self.translator = build_translator(opt, report_score=True)
         
     def m_translate(srcs):
         '''
