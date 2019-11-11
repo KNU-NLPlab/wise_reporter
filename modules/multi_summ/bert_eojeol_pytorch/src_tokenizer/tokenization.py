@@ -92,8 +92,7 @@ class BertTokenizer(object):
 		self.vocab = load_vocab(vocab_file)
 		self.ids_to_tokens = collections.OrderedDict(
 			[(ids, tok) for tok, ids in self.vocab.items()])
-		self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case,
-											  never_split=never_split)
+		self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case, never_split=never_split)
 		self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
 		self.max_len = max_len if max_len is not None else int(1e12)
 
