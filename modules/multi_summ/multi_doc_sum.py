@@ -1,15 +1,15 @@
 from __future__ import unicode_literals
 import configargparse
-from onmt.utils.logging import init_logger
-from onmt.utils.misc import split_corpus
-from onmt.translate.translator import build_translator
-from bert_eojeol_pytorch.src_tokenizer import tokenization
+from modules.multi_summ.onmt.utils.logging import init_logger
+from modules.multi_summ.onmt.utils.misc import split_corpus
+from modules.multi_summ.onmt.translate.translator import build_translator
+from modules.multi_summ.bert_eojeol_pytorch.src_tokenizer import tokenization
 import onmt.opts as opts
 import torch
 import copy
 import os
 
-tokenizer = tokenization.BertTokenizer('./bert_eojeol_pytorch/vocab.korean.rawtext.list')
+tokenizer = tokenization.BertTokenizer('./modules/multi_summ/bert_eojeol_pytorch/vocab.korean.rawtext.list')
 
 class mds():
     def __init__(self, gpu):
@@ -24,7 +24,7 @@ class mds():
         os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
         opt = parser.parse_args()
 
-        opt.models = ['./dataset_m2s2/korean_bert_8_single_new_economy_segment_eos_penalty_step_25000.pt']
+        opt.models = ['./modules/multi_summ/dataset_m2s2/korean_bert_8_single_new_economy_segment_eos_penalty_step_25000.pt']
         opt.segment = True
         opt.batch_size = 8
         opt.beam_size = 10
