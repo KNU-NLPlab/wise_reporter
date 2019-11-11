@@ -8,6 +8,7 @@ import onmt.opts as opts
 import torch
 import copy
 import os
+import sys
 
 tokenizer = tokenization.BertTokenizer('./modules/multi_summ/bert_eojeol_pytorch/vocab.korean.rawtext.list')
 
@@ -25,6 +26,8 @@ class mds():
             print('do not try hacking')
             exit()
         os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
+        
+        sys.argv = ["python"]
         opt = parser.parse_args()
 
         opt.models = ['./modules/multi_summ/dataset_m2s2/korean_bert_8_single_new_economy_add_cls_sep_segment_eos_penalty_new_bloom_step_25000.pt']

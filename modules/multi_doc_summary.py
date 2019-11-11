@@ -11,7 +11,7 @@ class MultiDocSummary(BaseModule):
     Args:
         topic (string): a keyword query
     '''
-    def __init__(self, gpu):
+    def __init__(self, topic, out_path, gpu="0"):
         '''
         Args:
             gpu (str or int): gpu number
