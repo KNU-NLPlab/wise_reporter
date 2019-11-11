@@ -6,6 +6,7 @@
 ## 모듈 현황 및 Refactoring 진행 상황
 1. Document Graph Analyzer
 2. Multi Document Summarizer
+    Model: https://drive.google.com/file/d/1YEqkteTMnoQhZBeUm6fbbEew8LH_xyeF/view?usp=sharing
 3. Timeline Summarizer
 4. ~~Image Retriever~~
 5. ~~Image Caption Generater~~
