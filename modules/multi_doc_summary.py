@@ -5,7 +5,6 @@ from modules.multi_summ.multi_doc_sum import mds
 from modules.base_module import BaseModule
 
 
-
 class MultiDocSummary(BaseModule):
     '''
     The model for a summary using multiple documents

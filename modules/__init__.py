@@ -1,3 +1,4 @@
+import modules
 import modules.doc_graph
 import modules.scouter
 import modules.multi_summ

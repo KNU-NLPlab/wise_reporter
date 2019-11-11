@@ -1,5 +1,5 @@
 from modules.base_module import BaseModule
-from image_selection.image_selection_2019_v1 import *
+from modules.image_selection.image_selection_2019_v1 import *
 
 class ImageSelectionModule(BaseModule):
     def __init__(self, topic, out_path):        
