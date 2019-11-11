@@ -24,7 +24,7 @@ class mds():
         os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
         opt = parser.parse_args()
 
-        opt.models = ['./modules/multi_summ/dataset_m2s2/korean_bert_8_single_new_economy_segment_eos_penalty_step_25000.pt']
+        opt.models = ['./modules/multi_summ/dataset_m2s2/korean_bert_8_single_new_economy_add_cls_sep_segment_eos_penalty_new_bloom_step_25000.pt']
         opt.segment = True
         opt.batch_size = 8
         opt.beam_size = 10
