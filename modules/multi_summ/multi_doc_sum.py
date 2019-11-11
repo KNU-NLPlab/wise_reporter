@@ -22,6 +22,7 @@ class mds():
         opts.translate_opts(parser)
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
         if len(gpu) > 1:
+            print('do not try hacking')
             exit()
         os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
         opt = parser.parse_args()
