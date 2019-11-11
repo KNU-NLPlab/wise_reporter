@@ -523,7 +523,7 @@ class Translator(object):
                         bb.append(ma)
                 aa.append(bb)
             mask = (src[:, :, 0].transpose(0, 1).data.eq(0) ^ torch.ones_like(src.transpose(0, 1).squeeze(2),
-                                                                              dtype=torch.bool))
+                                                                              dtype=torch.uint8))
             enc_states, memory_bank, _ = self.model.encoder(src.squeeze(2).transpose(0, 1),
                                                             token_type_ids=torch.tensor(aa).type(torch.int64).to(
                                                                 'cuda'),
