@@ -20,7 +20,9 @@ class mds():
         opts.config_opts(parser)
         opts.add_md_help_argument(parser)
         opts.translate_opts(parser)
-        os.environ["CUDA_DEVICE_ORDER"] = "CUDA_DEVICE_ORDER"
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+        if len(gpu) > 1:
+            exit()
         os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
         opt = parser.parse_args()
 
