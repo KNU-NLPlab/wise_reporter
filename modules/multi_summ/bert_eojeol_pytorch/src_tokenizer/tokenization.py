@@ -61,7 +61,6 @@ def load_vocab(vocab_file):
 			if not token:
 				break
 			
-			### joonho.lim @ 2019-03-15
 			if token.find('n_iters=') == 0 or token.find('max_length=') == 0 :
 				continue
 			token = token.split('\t')[0]
@@ -101,7 +100,6 @@ class BertTokenizer(object):
 	def tokenize(self, text):
 		split_tokens = []
 		for token in self.basic_tokenizer.tokenize(text):
-			### joonho.lim @ 2019-03-15
 			token += '_'
 			for sub_token in self.wordpiece_tokenizer.tokenize(token):
 				split_tokens.append(sub_token)
@@ -183,7 +181,6 @@ class BasicTokenizer(object):
 	def tokenize(self, text):
 		"""Tokenizes a piece of text."""
 		text = self._clean_text(text)
-		### joonho.lim @ 2019-03-15
 		# # # This was added on November 1st, 2018 for the multilingual and Chinese
 		# # # models. This is also applied to the English models now, but it doesn't
 		# # # matter since the English models were not trained on any Chinese data
@@ -325,10 +322,6 @@ class WordpieceTokenizer(object):
 				cur_substr = None
 				while start < end:
 					substr = "".join(chars[start:end])
-					### joonho.lim @ 2019-03-15
-					# if start > 0:
-						# substr = "##" + substr
-					# print ( '[substr]\t%s\t%s\t%d\t%d' % ( substr, substr in self.vocab, start, end))
 					if substr in self.vocab:
 						cur_substr = substr
 						break
@@ -371,7 +364,6 @@ def _is_control(char):
 
 
 def _is_punctuation(char):
-	### joonho.lim @ 2019-03-15
 	return char == ' '
 	
 	# """Checks whether `chars` is a punctuation character."""
