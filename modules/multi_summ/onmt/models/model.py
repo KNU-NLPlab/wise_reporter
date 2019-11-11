@@ -36,7 +36,7 @@ class NMTModel(nn.Module):
         # 기본 128
         down = 128
         # self.encoder = BertModel.from_pretrained('bert-base-uncased').to('cuda')
-        self.encoder = BertModel(BertConfig.from_json_file('./bert_eojeol_pytorch/bert_config.json'))
+        self.encoder = BertModel(BertConfig.from_json_file('./modules/multi_summ/bert_eojeol_pytorch/bert_config.json'))
         # self.encoder = BertModel.from_pretrained('./models/korean_bert')
         for i, _ in enumerate(self.encoder.parameters()):
             _.requires_grad = False
@@ -46,7 +46,7 @@ class NMTModel(nn.Module):
         #     if i < 6:
         #         for __ in _.parameters():
         #             __.requires_grad = False
-        self.segment = pickle.load(open('./bert_eojeol_pytorch/segment.pkl', 'rb'))
+        self.segment = pickle.load(open('./modules/multi_summ/bert_eojeol_pytorch/segment.pkl', 'rb'))
         # self.encoder.encoder.adapter = nn.ModuleList([Adapter(768, 256).cuda() for _ in range(len(self.encoder.encoder.layer._modules))])
         for a in self.encoder.encoder.layer:
             a.attn_adapter = Adapter(768, down).cuda()
