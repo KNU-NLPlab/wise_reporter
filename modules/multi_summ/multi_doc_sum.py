@@ -46,7 +46,7 @@ class mds():
         logger = init_logger(opt.log_file)
         self.translator = build_translator(opt, report_score=True)
         
-    def m_translate(srcs):
+    def m_translate(self, srcs):
         '''
         :param srcs: [str, str, ..., ]
         :return: str 
