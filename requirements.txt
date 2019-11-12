@@ -6,7 +6,7 @@ numpy
 python-igraph
 
 # Multi-doc summarization
-torch==1.2.0
+torch==1.0.0
 six
 future
 configargparse

@@ -47,7 +47,7 @@ class forecasting():
             if postingDate <= today_datetime and postingDate >= week_before:
 
                 # real one
-                for sentence in doc['anayzed_text']['sentence']:
+                for sentence in doc['analyzed_text']['sentence']:
                     morph_sentence = [morp_info['lemma'] for morp_info in sentence['morp']]
                     output = prediction.predict(morph_sentence)
                     if output == '1':

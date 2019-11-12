@@ -76,7 +76,7 @@ def VGG_classifier(file_list, image_list, caption_list):
         resized_image_list.append(pix)
     categories = ["graph","others"] # label 0 : graph image / label 1 : non-graph
     test = np.array(resized_image_list)
-    model = load_model('weight_best.hdf')
+    model = load_model('./modules/image_selection/weight_best.hdf')
     predict = model.predict_classes(test)
     for i in range(len(test)):
         print(file_list[i] + " : , Predict : "+ str(categories[predict[i]]))
