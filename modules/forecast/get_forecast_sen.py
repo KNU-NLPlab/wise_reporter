@@ -39,19 +39,17 @@ class forecasting():
         today_datetime, week_before = self.convert_datetime(today)
 
 
-
         forecast_list = []
         for doc in doc_info_list:
             # get docs as recent a week
             postingDate = datetime.datetime.strptime(doc['postingDate'], '%Y-%m-%d').date()
             if postingDate <= today_datetime and postingDate >= week_before:
-
                 # real one
                 for sentence in doc['analyzed_text']['sentence']:
                     morph_sentence = [morp_info['lemma'] for morp_info in sentence['morp']]
-                    output = prediction.predict(morph_sentence)
+                    output = prediction.predict(morph_sentence, cnn, text_field, label_field)
                     if output == '1':
-                        forecast_list.append(sentence)
+                        forecast_list.append(sentence['text'])
         if forecast_list == []:
             print('no forecasts')
         return forecast_list
