@@ -76,7 +76,7 @@ class ScouterHandler():
         
         return doc_info_list
     
-    def search_for_trend(self, query_body, max_num_doc=10000, preprocess_fnc=None, trim_lower=False):
+    def search_for_trend(self, query_body, max_num_doc=10000):
         '''
         Request the data searched by the query on Scouter server
         Args:
@@ -87,14 +87,8 @@ class ScouterHandler():
             doc_info_list (list): list of searched data that is refined by preprocess_fnc
         '''
         
-        doc_info_list = []
-        if preprocess_fnc == None: preprocess_fnc = self._default_preprocess_fnc
-            
-        cummulated_num_docs = 0
-        
         es_client = Elasticsearch(self.addr)
         response = es_client.search(index='newspaper',
-                                    doc_type='text',
                                     scroll='10m',
                                     size=max_num_doc,
                                     body=query_body)
@@ -144,7 +138,7 @@ class ScouterHandler():
         return query_body
     
     @classmethod
-    def make_count_query_body(self, keyword, filters=None):
+    def make_count_query_body(self, keyword, from_date="2017-01-01", to_date="2019-12-31"):
         '''
         Make a query body to generate trend analysis
         Args:
@@ -155,26 +149,35 @@ class ScouterHandler():
         '''
         
         print("Query : {}".format(keyword))
-        keyword_list = keyword.split(' ')
-        
+        keyword_list = "삼성전자".split()
+
         # make a conjugated filter for elasticsearch
         and_query = [{"match": { "extContent": word } } for word in keyword_list]
         query_body = {
             'size':0,
-            'query': {"bool": {"must":and_query} },
+            'query': {"bool": {"must":and_query}},
+         #   '_source': ['news_id'],
             "aggs": {
-                "group_by_date" :{
-                    "date_histogram": {
-                        "field": "postingDate",
-                        "interval": "1d", 
-                        "format": "yyyy-MM-dd"
+                "date_range": {
+                    "range" : {
+                        "field" : "postingDate",
+                        "ranges" : [
+                            { "from" : from_date, "to" : to_date }
+                        ]
+                    },
+                    "aggs": {
+                        "group_by_date" :{
+                            "date_histogram": {
+                                "field": "postingDate",
+                                "interval": "1d", 
+                                "format": "yyyy-MM-dd"
+                            }
+                        }
                     }
                 }
             }
         }
-        if filters is not None:
-            query_body['_source'] = filters
-        
+
         return query_body
     
     def _default_preprocess_fnc(self, response):

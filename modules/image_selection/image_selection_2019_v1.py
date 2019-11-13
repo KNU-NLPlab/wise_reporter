@@ -14,6 +14,15 @@ from keras.models import load_model
 from PIL import Image
 from scipy import spatial
 
+from keras.backend.tensorflow_backend import set_session
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+
+sess = tf.Session(config=config)
+set_session(sess)
+
+model = load_model('./modules/image_selection/weight_best.hdf')
 
 #---------image and title download--------------
 def image_caption_downloader(query, download_limit):
@@ -30,7 +39,7 @@ def image_caption_downloader(query, download_limit):
     header={"User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36"}
     k = 1
     i = 1
-    url = "https://www.google.co.kr/search?q=" + urllib.parse.quote(query[0]) + "&source=lnms&tbm=isch" 
+    url = "https://www.google.co.kr/search?q=" + urllib.parse.quote(query[0]) + "&source=lnms&tbm=isch"
     foldername = "./downloads" + "/" + query[0] 
     if not os.path.exists(foldername):
         os.mkdir(foldername)
@@ -61,7 +70,7 @@ def USE_embedding(input_text):
         embedded_text = embed(text_input)
         init_op = tf.group([tf.global_variables_initializer(), tf.tables_initializer()])
     g.finalize()
-    session = tf.Session(graph=g)
+    session = tf.Session(graph=g, config=config)
     session.run(init_op)
     embedded_output = session.run(embedded_text, feed_dict={text_input: input_text})
     return embedded_output
@@ -76,7 +85,6 @@ def VGG_classifier(file_list, image_list, caption_list):
         resized_image_list.append(pix)
     categories = ["graph","others"] # label 0 : graph image / label 1 : non-graph
     test = np.array(resized_image_list)
-    model = load_model('./modules/image_selection/weight_best.hdf')
     predict = model.predict_classes(test)
     for i in range(len(test)):
         print(file_list[i] + " : , Predict : "+ str(categories[predict[i]]))
