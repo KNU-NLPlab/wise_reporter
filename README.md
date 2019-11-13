@@ -10,9 +10,9 @@
 3. Timeline Summarizer
 4. ~~Image Retriever~~
 5. ~~Image Caption Generater~~
-6. Outlook
-    Model: https://drive.google.com/open?id=1DkHGDm2F3uSgCuTNnHVjWKTJpALDNhts
-    Path: modules/forecast/model/
+6. Outlook  
+    Model: https://drive.google.com/open?id=1DkHGDm2F3uSgCuTNnHVjWKTJpALDNhts  
+    Path: modules/forecast/model/  
 
 ## 구현 가이드라인
 
