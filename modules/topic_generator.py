@@ -8,9 +8,12 @@ import json
 
 class TopicGenerator(BaseModule):
     
+                 
+    
     def __init__(self, topic, out_path):
         super(TopicGenerator, self).__init__(topic, out_path)
-        
+        self.getDoc = es.ScouterHandler()
+                 
     def process_data(self, date):
         indexed_cluster = es.keywordGetter(date)
         
@@ -20,8 +23,8 @@ class TopicGenerator(BaseModule):
             qbody = es.ScouterHandler.make_date_query_body(date,("news_id","extContent","analyzed_text","analyzed_text.sentence.WSD.text",
                                                                  "analyzed_text.sentence.WSD.type","category","analyzed_title.sentence.WSD.text",
                                                                  "analyzed_title.sentence.WSD.type"))
-            getDoc = es.ScouterHandler()
-            docs  = getDoc.search(qbody,'newspaper')
+          
+            docs  = self.getDoc.search(qbody,'newspaper')
             result = {'date': date,
                'doc count': len(docs)}
             clus = cl.cluteringDoc(5,0.95,docs)
@@ -59,7 +62,7 @@ class TopicGenerator(BaseModule):
                 result['cluster'+str(i+1)+'trigram'] = cluster_tri
                 
             return result
-
+    
     
     
 
