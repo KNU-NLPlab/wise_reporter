@@ -6,7 +6,7 @@
 ## 모듈 현황 및 Refactoring 진행 상황
 1. Topic Generator
 2. Multi Document Summarizer (modules/multi_summ/dataset_m2s2/[Model](https://drive.google.com/file/d/1YEqkteTMnoQhZBeUm6fbbEew8LH_xyeF/view?usp=sharing))
-3. Timeline Summarizer (modules/timeline_summ/model/[Model](https://drive.google.com/open?id=1jC_Ygf2C_D3aOoF78gIIM9W1BmNUbZZD))
+3. Timeline Summarizer (modules/timeline_summ/model/[Model](https://drive.google.com/open?id=1sVoJk9Swkj7uQSFsmXVKdQf88H1RyM-U))
 4. Outlook (modules/forecast/model/[Model](https://drive.google.com/open?id=1DkHGDm2F3uSgCuTNnHVjWKTJpALDNhts))
 
 ## 구현 가이드라인
