@@ -1,7 +1,7 @@
 # wise_reporter
 
 ## 임시
-[test.ipynb](https://github.com/KNU-NLPlab/wise_reporter/blob/master/test.ipynb) 참조
+[test.ipynb](https://github.com/KNU-NLPlab/wise_reporter/blob/dependabot/pip/modules/image_selection/pillow-6.2.1/test.ipynb) 참조
 
 ## 모듈 현황 및 Refactoring 진행 상황
 1. Topic Generator
