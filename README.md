@@ -7,7 +7,8 @@
 1. Topic Generator
 2. Multi Document Summarizer (modules/multi_summ/dataset_m2s2/[Model](https://drive.google.com/file/d/1YEqkteTMnoQhZBeUm6fbbEew8LH_xyeF/view?usp=sharing))
 3. Timeline Summarizer (modules/timeline_summ/model/[Model](https://drive.google.com/open?id=1ylL4InDMU6EZ6hCv-w8C0IsvSH3DuOLf))
-4. Outlook (modules/forecast/model/[Model](https://drive.google.com/open?id=1DkHGDm2F3uSgCuTNnHVjWKTJpALDNhts))
+4. Image Selector
+5. Outlook (modules/forecast/model/[Model](https://drive.google.com/open?id=1DkHGDm2F3uSgCuTNnHVjWKTJpALDNhts))
 
 ## 구현 가이드라인
 
