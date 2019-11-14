@@ -4,17 +4,10 @@
 [test.ipynb](https://github.com/KNU-NLPlab/wise_reporter/blob/master/test.ipynb) 참조
 
 ## 모듈 현황 및 Refactoring 진행 상황
-1. Document Graph Analyzer
-2. Multi Document Summarizer  
-    Model: https://drive.google.com/file/d/1YEqkteTMnoQhZBeUm6fbbEew8LH_xyeF/view?usp=sharing
-3. Timeline Summarizer  
-    Model: https://drive.google.com/open?id=1jC_Ygf2C_D3aOoF78gIIM9W1BmNUbZZD  
-    Path: modules/timeline_summ/model/  
-4. ~~Image Retriever~~
-5. ~~Image Caption Generater~~
-6. Outlook  
-    Model: https://drive.google.com/open?id=1DkHGDm2F3uSgCuTNnHVjWKTJpALDNhts  
-    Path: modules/forecast/model/  
+1. Topic Generator
+2. Multi Document Summarizer ([Model](https://drive.google.com/file/d/1YEqkteTMnoQhZBeUm6fbbEew8LH_xyeF/view?usp=sharing))
+3. Timeline Summarizer (modules/timeline_summ/model/[Model](https://drive.google.com/open?id=1jC_Ygf2C_D3aOoF78gIIM9W1BmNUbZZD))
+4. Outlook (modules/forecast/model/[Model](https://drive.google.com/open?id=1DkHGDm2F3uSgCuTNnHVjWKTJpALDNhts))
 
 ## 구현 가이드라인
 
