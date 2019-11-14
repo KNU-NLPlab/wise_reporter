@@ -14,7 +14,7 @@ from modules.timeline_summ import getKeyword
 from modules.timeline_summ import makePreCandSent
 from modules.timeline_summ import redundancyCheck
 from modules.timeline_summ import makeSummary
-from modules.timeline_summ import abstractiveSumm
+from modules.timeline_summ import bertCompression
 
 from modules.timeline_summ.cleanDirectory import cleanDirectory
 
@@ -32,7 +32,7 @@ class TimelineSummary(BaseModule):
         self.doc_slice = 1000
         
 
-    def process_data(self, doc_info_list, timeline_threshold=0.3, phrase_threshold=17):
+    def process_data(self, doc_info_list, timeline_threshold=0.5, phrase_threshold=20):
         '''
         Overrided method from BaseModule class
         Extract top keyword and document id in several subtopics
@@ -45,6 +45,7 @@ class TimelineSummary(BaseModule):
         # summary -> demo main page
         # beam_search -> detail page
         self.main_json, self.detail_json = self._summarization(doc_save_list, timeline_threshold, phrase_threshold)
+        return self.main_json, self.detail_json
     
     def generate_json(self):
         '''
@@ -68,7 +69,7 @@ class TimelineSummary(BaseModule):
 
         return doc_save_list
     
-    def _summarization(self, doc_save_list, timeline_threshold=0.3, phrase_threshold=17):
+    def _summarization(self, doc_save_list, timeline_threshold, phrase_threshold):
         '''
         Args:
             timeline_threshold : Burst의 임계치. 높이면 속도 증가
@@ -76,7 +77,7 @@ class TimelineSummary(BaseModule):
         '''
         start_time = time.time()
         
-        timeline_out_path = os.path.join(self.out_path, self.topic, "timeline/")
+        timeline_out_path = os.path.join(self.out_path, "timeline/")
 
         cleanDirectory(timeline_out_path)
 
@@ -109,8 +110,8 @@ class TimelineSummary(BaseModule):
 
         cleanDirectory(tempDic)
 
-        # E. abstracitveSumm
-        summary = abstractiveSumm.main(summary)
+        # E. BERT compression
+        summary = bertCompression.main(summary)
         print("E : ", time.time()-start_time)
 
 

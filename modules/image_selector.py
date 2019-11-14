@@ -17,5 +17,5 @@ class ImageSelectionModule(BaseModule):
         final_image = semantic_similarity_module(topic, nongraph_image_list, nongraph_caption_list) # get final image through semantic similarity measurement
         imgsave_path = image_save_path # path to save final recommended image
         temp_image = Image.open(final_image)
-        temp_image.save('%s%s'%(imgsave_path,final_image.split('/')[3])) # save final recommended image to given path
+        temp_image.save('%s%s'%(imgsave_path, final_image.split('/')[3])) # save final recommended image to given path
         shutil.rmtree('./downloads/%s'%(final_image.split('/')[2]), ignore_errors=True)
