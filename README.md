@@ -7,7 +7,9 @@
 1. Document Graph Analyzer
 2. Multi Document Summarizer  
     Model: https://drive.google.com/file/d/1YEqkteTMnoQhZBeUm6fbbEew8LH_xyeF/view?usp=sharing
-3. Timeline Summarizer
+3. Timeline Summarizer  
+    Model: https://drive.google.com/open?id=1jC_Ygf2C_D3aOoF78gIIM9W1BmNUbZZD  
+    Path: modules/timeline_summ/model/  
 4. ~~Image Retriever~~
 5. ~~Image Caption Generater~~
 6. Outlook  
