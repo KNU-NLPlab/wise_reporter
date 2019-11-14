@@ -3,3 +3,4 @@ import modules.timeline_summ.getKeyword
 import modules.timeline_summ.makePreCandSent
 import modules.timeline_summ.redundancyCheck
 import modules.timeline_summ.makeSummary
+import modules.timeline_summ.bertCompression

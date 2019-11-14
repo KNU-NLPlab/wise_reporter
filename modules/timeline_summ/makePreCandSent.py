@@ -68,12 +68,13 @@ def getKeyword(keywords, sentenceSets, queryWordSet, threshold, alpha) :
             words = sent[2] # keyword set
             relation = sent[3] # relation set
             dependency = sent[4] # dependency information
+            morph_tag = sent[5]
             #print(sent)
             sentence = re.sub(' +', ' ', sentence)
             if len(relation) == 0 :
                 continue
             #else :
-            #	print(sent) 
+            #	print(sent)
             #	sys.exit(1)
 
             spacing = len(sentence.split())
@@ -81,7 +82,7 @@ def getKeyword(keywords, sentenceSets, queryWordSet, threshold, alpha) :
             if threshold != -1 and spacing > threshold :
                 continue
 
-            inforScore = 0 
+            inforScore = 0
             for key in tsKeywords :
                 if key in words :
                     if key in queryWordSet :
@@ -113,9 +114,8 @@ def getKeyword(keywords, sentenceSets, queryWordSet, threshold, alpha) :
             if swt == 1 and inforScore < minScore :
                 continue
 
-            # 문장 개수 조절할 수 있는 Threshold. 늘이면 속도 증가
             if len(candidates) < 5 :
-                candidates[sentence] = {'inforScore' : inforScore, 'morphs' : morphs, 'keyword' : words, 'relation' : relation, 'dependency' : dependency}
+                candidates[sentence] = {'inforScore' : inforScore, 'morphs' : morphs, 'keyword' : words, 'relation' : relation, 'dependency' : dependency, 'morph_tag': morph_tag}
                 scoreSet.append(inforScore)
 
             else :
@@ -127,10 +127,10 @@ def getKeyword(keywords, sentenceSets, queryWordSet, threshold, alpha) :
 
                     for key in delList :
                         del candidates[key]
-                    candidates[sentence] = {'inforScore' : inforScore, 'morphs' : morphs, 'keyword' : words, 'relation' : relation, 'dependency' : dependency}
+                    candidates[sentence] = {'inforScore' : inforScore, 'morphs' : morphs, 'keyword' : words, 'relation' : relation, 'dependency' : dependency, 'morph_tag':morph_tag}
                     scoreSet.append(inforScore)
                 elif inforScore == minScore :
-                    candidates[sentence] = {'inforScore' : inforScore, 'morphs' : morphs, 'keyword' : words, 'relation' : relation, 'dependency' : dependency}
+                    candidates[sentence] = {'inforScore' : inforScore, 'morphs' : morphs, 'keyword' : words, 'relation' : relation, 'dependency' : dependency, 'morph_tag':morph_tag}
                     scoreSet.append(inforScore)
 
         candidateSets[date] = candidates

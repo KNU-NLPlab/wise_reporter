@@ -1,10 +1,5 @@
 from __future__ import unicode_literals
 
-from onmt.translate.translator import build_translator
-import onmt.opts as opts
-from onmt.utils.parse import ArgumentParser
-
-import tools.etri_nlp as etri_nlp
 
 def translate(sentences):
     parser = ArgumentParser(description='translate.py')
