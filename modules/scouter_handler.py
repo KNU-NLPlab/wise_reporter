@@ -94,6 +94,25 @@ class ScouterHandler():
                                     body=query_body)
         return response
    
+    def search_for_topic(self, keywords):
+        es_client = Elasticsearch(self.addr)
+        # keywords = [ 'word1', 'word2', 'workd3']
+        query = {"query": {"bool":{
+                "filter": {
+                    "range": {
+                        "postingDate": {
+                            "gte": "2019-01-01",
+                            "lte": "2019-05-31"
+                        }}}, 
+                "must": [
+                    {"match": {"extContent": keywords[i]}} for i in range(len(keywords))   ]    }}}
+        res = es_client.search(body=query, index='newspaper')
+        if res['hits']['total']['value'] == 0:
+            return []
+        else:
+            docs = [doc['_source'] for doc in res['hits']['hits']]
+            return docs
+        
     @classmethod
     def make_keyword_query_body(self, keyword, filters=None):
         '''
