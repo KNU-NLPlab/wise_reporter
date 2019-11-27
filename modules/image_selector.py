@@ -6,7 +6,7 @@ from elasticsearch import Elasticsearch
 class ImageSelectionModule(BaseModule):
     def __init__(self, out_path):        
         self.out_path = out_path
-        self.vggModel = load_model('image_selection/weight_best.hdf') ###
+        self.vggModel = load_model('modules/image_selection/weight_best.hdf') ###
         self.es = Elasticsearch("155.230.34.145:9200")
         print("weight_best loaded")
         self.g = tf.Graph()
@@ -17,6 +17,7 @@ class ImageSelectionModule(BaseModule):
             self.init_op = tf.group([tf.global_variables_initializer(), tf.tables_initializer()])
         self.g.finalize()
         print("graph defined")
+        
     def process_data(self, query, image_save_path, download_limit = 50):
         es_query = {'query':{'match':{'keyword':query}}}
         res = self.es.search(index='image', body=es_query)
@@ -28,7 +29,6 @@ class ImageSelectionModule(BaseModule):
         check_query_exist = os.listdir(path_cached)
         if query not in check_query_exist:  # case 1 : if query is new - download images & caption from google, scouter caching(url, caption), local caching(image path, caption)
             print("query is new")
-            newtime = time.time()
             if type(query) is list:
                 topic = []
                 topic.append(query[0].replace('/','_'))
@@ -62,11 +62,12 @@ class ImageSelectionModule(BaseModule):
                     print("Failed to create directory!!!!!")
                     raise
             localcache_name = 'localcache/%s.txt'%(query)
-            with open(localcache_name, 'w') as f:
-                for imgfile in image_list:
-                    f.write("%s\n"%imgfile)
-                for captionfile in caption_list:
-                    f.write("%s\n"%captionfile)
+            if try_iter != 5: # wychoi: 이미지 검색 안되면 caching 안함
+                with open(localcache_name, 'w') as f:
+                    for imgfile in image_list:
+                        f.write("%s\n"%imgfile)
+                    for captionfile in caption_list:
+                        f.write("%s\n"%captionfile)
 
         else: # case 2 : if query is used before - use local cached data
             print("query already used before")
