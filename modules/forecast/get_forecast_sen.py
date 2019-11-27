@@ -40,25 +40,29 @@ class forecasting():
 
 
         forecast_list = []
+        # for date in doc_info_list.keys():
+        #     for doc in doc_info_list[date]:
         for doc in doc_info_list:
-            # get docs as recent a week
+                # get docs as recent a week
             postingDate = datetime.datetime.strptime(doc['postingDate'], '%Y-%m-%d').date()
             if postingDate <= today_datetime and postingDate >= week_before:
                 # real one
                 for sentence in doc['analyzed_text']['sentence']:
+                # for sentence in doc['extract']:
                     morph_sentence = [morp_info['lemma'] for morp_info in sentence['morp']]
-                    output = prediction.predict(morph_sentence, cnn, text_field, label_field)
-                    if output == '1':
-                        forecast_list.append(sentence['text'])
-        if forecast_list == []:
-            print('no forecasts')
+                    try:
+                        output, confidence = prediction.predict(morph_sentence, cnn, text_field, label_field)
+                    except:
+                        pass
+                    if output == '1' and confidence[0][1] >= 0.9:
+                        forecast_list.append(sentence['text'] + '\t' + str(confidence[0][1]))
         return forecast_list
 
-    def make_morp_sentence(self, morph_json):
-        morp_element_list = []
-        for sentence in morph_json['sentence']:
-            # get morp
-            morp_elements = [morp_info['lemma'] for morp_info in sentence['morp']]
-            morp_element_list.extend(morp_elements)
-            # save to file
-        return ' '.join(morp_element_list)
+    # def make_morp_sentence(self, morph_json):
+    #     morp_element_list = []
+    #     for sentence in morph_json['sentence']:
+    #         # get morp
+    #         morp_elements = [morp_info['lemma'] for morp_info in sentence['morp']]
+    #         morp_element_list.extend(morp_elements)
+    #         # save to file
+    #     return ' '.join(morp_element_list)
