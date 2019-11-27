@@ -68,13 +68,49 @@ class TimelineSummary(BaseModule):
                 return doc_save_list
 
         return doc_save_list
-    
+
+    def get_parameters(self, topic):
+        if topic == '트럼프 유가 OPEC':
+            timeline_threshold = 0.4
+            phrase_threshold = 20
+            onlyburst = False
+            alpha = 3
+            beta = 0
+        elif topic == '우리나라 외환보유액 감소':
+            timeline_threshold = 0.5
+            phrase_threshold = 20
+            onlyburst = True
+            alpha = 1 / 3
+            beta = 0
+        elif topic == '브렉시트 메이총리 英':
+            timeline_threshold = 0.5
+            phrase_threshold = 20
+            onlyburst = True
+            alpha = 1 / 3
+            beta = 0
+        elif topic == '미국 중국 무역':
+            timeline_threshold = 0.5
+            phrase_threshold = 20
+            onlyburst = True
+            alpha = 1 / 3
+            beta = 0
+        else:
+            timeline_threshold = 0.5
+            phrase_threshold = 20
+            onlyburst = True
+            alpha = 1 / 3
+            beta = 0
+        return timeline_threshold, phrase_threshold, onlyburst, alpha, beta
+
     def _summarization(self, doc_save_list, timeline_threshold, phrase_threshold):
         '''
         Args:
             timeline_threshold : Burst의 임계치. 높이면 속도 증가
             phrase_threshold : 문장 길이 임계치. 줄이면 속도 증가
         '''
+        timeline_threshold, phrase_threshold, onlyburst, alpha, beta = self.get_parameters(self.topic)
+
+
         start_time = time.time()
         
         timeline_out_path = os.path.join(self.out_path, "timeline/")
@@ -85,12 +121,12 @@ class TimelineSummary(BaseModule):
         tempDic = timeline_out_path + 'temp/'
         cleanDirectory(tempDic)
         
-        publicTimelineSet, burstTimeSet, timelineSet = makeTimeline.main(doc_save_list, timeline_threshold)
+        publicTimelineSet, burstTimeSet, timelineSet = makeTimeline.main(doc_save_list, timeline_threshold, alpha = alpha, beta = beta)
         print("A : ", time.time()-start_time)
         start_time = time.time()
 
         # B. getKeyword
-        tfScores, sentencesSets = getKeyword.main(timelineSet, doc_save_list, self.topic)
+        tfScores, sentencesSets = getKeyword.main(timelineSet, doc_save_list, self.topic, onlyburst = onlyburst)
         print("B : ", time.time()-start_time)
         start_time = time.time()
 

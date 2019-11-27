@@ -57,6 +57,15 @@ def openCandidates(timelinePath, keywordSet):
     timeline.sort()
     return candidateSentSets, candidateScoreSets, candidateKeywordSets, candidateRelationSets, candidateMorphTagSets, timeline
 
+def removeWords(savedResult):
+    with open('./modules/timeline_summ/tools/delete_word.txt', 'r', encoding='utf-8') as f:
+        words = [word.strip() for word in f.readlines()]
+    for sentence in savedResult:
+        for word in words:
+            if word in sentence['article'][0]['sentence']:
+                sentence['article'][0]['sentence'] = sentence['article'][0]['sentence'].replace(word, '')
+    return savedResult
+
 
 def main(keywordSet, inPath, outPath, timelineSet, burstTimeSet, query, threshold=3):
     timelinePath = inPath + '/'
@@ -381,6 +390,8 @@ def main(keywordSet, inPath, outPath, timelineSet, burstTimeSet, query, threshol
         # temp['tlink'] = candidateRelationSets[date][value]
 
         savedResult.append(temp)
+
+    savedResult = removeWords(savedResult)
 
     with open('result.json', 'w', encoding='utf-8') as f:
         json.dump(savedResult, f, ensure_ascii=False)

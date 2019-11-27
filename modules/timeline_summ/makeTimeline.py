@@ -132,9 +132,7 @@ def seperateTimeline(timelineSet, collectDates):
     return externalTimeline, internalTimeline
 
 
-def makeTimeline(externalTimeline, internalTimeline, burstTimeSet):  ### Phase 2. Select Main TimeStamp ###
-    alpha = 1 / 3
-    beta = 0
+def makeTimeline(externalTimeline, internalTimeline, burstTimeSet, alpha=1/3, beta = 0):  ### Phase 2. Select Main TimeStamp ###
 
     numOfburst = len(burstTimeSet)
     numOfinternalTS = numOfburst * alpha
@@ -150,11 +148,8 @@ def makeTimeline(externalTimeline, internalTimeline, burstTimeSet):  ### Phase 2
         for key, value in timeline.items():
             freqOfTimes.append(value['timefrequency'])
             freqOfEvents.append(value['eventfrequency'])
-        try:
-            maxTimeFreq = max(freqOfTimes)
-            maxEventFreq = max(freqOfEvents)
-        except:
-            pass
+        maxTimeFreq = max(freqOfTimes)
+        maxEventFreq = max(freqOfEvents)
 
         # Normalize with time and event
         for timestamp, events in timeline.items():
@@ -209,7 +204,7 @@ def main(doc_save_list, threshold, alpha=2, beta=0):
     numOfburst = len(burstTimeSet)
 
     # Step 4. Make Timeline
-    timelineSet = makeTimeline(externalTimeline, internalTimeline, burstTimeSet)
+    timelineSet = makeTimeline(externalTimeline, internalTimeline, burstTimeSet, alpha, beta)
 
     return publicTimelineSet, burstTimeSet, timelineSet
     # save timeline

@@ -44,7 +44,7 @@ def make_morph_tag_sentence(sentence):
         morp_element_list.extend(morp_elements)
     return ' '.join(temp)
 
-def main(timelineSet, doc_save_list, query):
+def main(timelineSet, doc_save_list, query, onlyburst = True):
     stopword = loadStopword()
 
     # A. Collect Sentences
@@ -102,12 +102,21 @@ def main(timelineSet, doc_save_list, query):
             for time in times:
                 for event in events:
                     if time in timelineSet:
-                        if event in timelineSet[time] and timelineSet[time]['burst'] == True:
-                            if 'tlink' not in sentence:
-                                sentenceSets[time].append([sentence['sentence'], morph, words, [], dps, morph_tag])
-                            else:
-                                sentenceSets[time].append([sentence['sentence'], morph, words, sentence['tlink'], dps, morph_tag])
-                            break
+                        if onlyburst == True:
+                            if event in timelineSet[time] and timelineSet[time]['burst'] == True:
+                                if 'tlink' not in sentence:
+                                    sentenceSets[time].append([sentence['sentence'], morph, words, [], dps, morph_tag])
+                                else:
+                                    sentenceSets[time].append([sentence['sentence'], morph, words, sentence['tlink'], dps, morph_tag])
+                                break
+                        else:
+                            if event in timelineSet[time] :
+                                if 'tlink' not in sentence:
+                                    sentenceSets[time].append([sentence['sentence'], morph, words, [], dps, morph_tag])
+                                else:
+                                    sentenceSets[time].append([sentence['sentence'], morph, words, sentence['tlink'], dps, morph_tag])
+                                break
+
 
     ### Main Phase 1. get keyword
     totalFreqOfWords = {}  # for idf
