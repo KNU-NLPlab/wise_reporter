@@ -24,9 +24,11 @@ class ImageSelectionModule(BaseModule):
             output = None
         else:
             output = res['hits']['hits'][0]['_source']
-        if output == None:  ### case 1 - if query is new  
-            query_flag = 0
-            url_list = []
+        path_cached = ('./downloads')
+        check_query_exist = os.listdir(path_cached)
+        if query not in check_query_exist:  # case 1 : if query is new - download images & caption from google, scouter caching(url, caption), local caching(image path, caption)
+            print("query is new")
+            newtime = time.time()
             if type(query) is list:
                 topic = []
                 topic.append(query[0].replace('/','_'))
@@ -36,7 +38,7 @@ class ImageSelectionModule(BaseModule):
                 topic.append(query)
             print("query pre-processed")
             try_iter = 1
-            while try_iter < 5: # handling VGG16 input error. because of image download (such as page not found)
+            while try_iter < 5: # handling VGG16 input error, no image found in google
                 try:
                     dict_image, file_list, image_list, caption_list = image_caption_downloader(topic, download_limit)
                     temp_f = file_list[0] 
@@ -45,12 +47,29 @@ class ImageSelectionModule(BaseModule):
                     print("try image download again")
                     try_iter = try_iter + 1
             print("image and caption downloaded")
-            image_dict = { 'keyword': query,
-                           'image': dict_image[query][0],
-                           'caption': dict_image[query][1]}
-            res = self.es.index(index='image', body=image_dict)
-        else:  ### case 2 - if query already used before
-            query_flag = 1
+
+            # --- scouter caching ---
+            if output == None:
+                image_dict = { 'keyword': query, 'image': dict_image[query][0], 'caption': dict_image[query][1]} 
+                res = self.es.index(index='image', body=image_dict)
+
+            # --- local caching ---
+            try:
+                if not(os.path.isdir('localcache')):
+                    os.makedirs(os.path.join('localcache'))
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    print("Failed to create directory!!!!!")
+                    raise
+            localcache_name = 'localcache/%s.txt'%(query)
+            with open(localcache_name, 'w') as f:
+                for imgfile in image_list:
+                    f.write("%s\n"%imgfile)
+                for captionfile in caption_list:
+                    f.write("%s\n"%captionfile)
+
+        else: # case 2 : if query is used before - use local cached data
+            print("query already used before")
             if type(query) is list:
                 topic = []
                 topic.append(query[0].replace('/','_'))
@@ -58,18 +77,16 @@ class ImageSelectionModule(BaseModule):
                 query = query.replace('/','_')
                 topic = []
                 topic.append(query)
-            url_list, file_list, image_list, caption_list = image_caption_get(topic, output)
+            localcache_name = 'localcache/%s.txt'%(query)
+            file_list, image_list, caption_list = image_caption_get(localcache_name, download_limit)
         if len(file_list) == 0:
             return False
-        nongraph_image_list, nongraph_caption_list = VGG_classifier(query_flag, url_list, file_list, image_list, caption_list, self.vggModel) ###
+
+        nongraph_image_list, nongraph_caption_list = VGG_classifier(file_list, image_list, caption_list, self.vggModel) ###
         final_image = semantic_similarity_module(self.g, self.init_op, self.embedded_text, self.text_input, topic, nongraph_image_list, nongraph_caption_list) ####
         imgsave_path = image_save_path # path to save final recommended image
-        if query_flag == 0:
-            temp_image = Image.open(final_image)
-            temp_image = temp_image.convert('RGB')
-            temp_image.save('%s'%(imgsave_path))
-            shutil.rmtree('./downloads/%s'%(final_image.split('/')[2]), ignore_errors=True)
-        else:
-            urllib.request.urlretrieve(final_image,imgsave_path) 
-
+        temp_image = Image.open(final_image)
+        temp_image = temp_image.convert('RGB')
+        temp_image.save('%s'%(imgsave_path))
+        #shutil.rmtree('./downloads/%s'%(final_image.split('/')[2]), ignore_errors=True)
 
