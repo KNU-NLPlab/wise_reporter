@@ -21,36 +21,36 @@ config.gpu_options.allow_growth=True
 #config.gpu_options.per_process_gpu_memory_fraction = 0.5 #########
 set_session = tf.Session(config=config)
 
+
+#---------sentence embedding module--------------
 def USE_embedding(input_text, g, init_op, embedded_text, text_input):
     session = tf.Session(graph=g)
     session.run(init_op)
     embedded_output = session.run(embedded_text, feed_dict={text_input: input_text})
     return embedded_output
 
-#---------get image and title from db--------------
-def image_caption_get(query, output):
-    try:
-        if not(os.path.isdir('downloads')):
-            os.makedirs(os.path.join('downloads'))
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            print("Failed to create directory!!!!!")
-            raise
+
+#---------get image and caption from local cached data--------------
+def image_caption_get(localcache_name, download_limit):
     file_list = []
     image_list = []
-    url_list = output['image']
-    caption_list = output['caption']
-    foldername = "./downloads" + "/" + query[0]
-    if not os.path.exists(foldername):
-        os.mkdir(foldername)
-    for i in range(len(url_list)):
-        filename = "%d.jpg" % (i+1)
-        file_list.append(filename)
-        fullfilename = os.path.join(foldername, filename)
-        image_list.append(fullfilename)
-    return url_list, file_list, image_list, caption_list
+    caption_list = []
+    f = open(localcache_name,'r')
+    it = 0
+    while True:
+        line = f.readline()
+        if it < download_limit :
+            file_list.append((line.split('/')[-1]).splitlines()[0])
+            image_list.append(line.splitlines()[0])
+            it = it + 1
+        elif it >= download_limit and it < download_limit*2 :
+            caption_list.append(line.splitlines()[0])
+            it = it + 1       
+        if not line: break
+    return file_list, image_list, caption_list
 
-#---------image and title download from google--------------
+
+#---------get image and caption from google search engine--------------
 def image_caption_downloader(query, download_limit):
     try:
         if not(os.path.isdir('downloads')):
@@ -73,9 +73,7 @@ def image_caption_downloader(query, download_limit):
     response = urllib.request.urlopen(req).read()
     soup = BeautifulSoup(response, "html.parser")
     link = [(json.loads(div.text)['ou'], json.loads(div.text)['tu'], json.loads(div.text)['pt']) for div in soup('div', 'rg_meta')]
-    #if not link:
-    #    return False
-    dict_image = {} # dictionary for caching images
+    dict_image = {} # dictionary for caching images to scouter
     image_url_list = []
     for l in link:
         filename = "%d.jpg" % (i)
@@ -94,14 +92,10 @@ def image_caption_downloader(query, download_limit):
 
 
 #-----------VGG graph/non-graph image classifier--------------------------------
-#@profile
-def VGG_classifier(query_flag, url_list, file_list, image_list, caption_list, vggModel):
+def VGG_classifier(file_list, image_list, caption_list, vggModel):
     resized_image_list = []  
     for i in range(len(image_list)):
-        if query_flag == 0:
-            resized = Image.open(image_list[i]).convert('RGB').resize((224,224))
-        else:
-            resized = Image.open(urllib.request.urlopen(url_list[i])).convert('RGB').resize((224,224))
+        resized = Image.open(image_list[i]).convert('RGB').resize((224,224))
         pix=np.array(resized) / 255
         resized_image_list.append(pix)
     categories = ["graph","others"] # label 0 : graph image / label 1 : non-graph
@@ -111,23 +105,16 @@ def VGG_classifier(query_flag, url_list, file_list, image_list, caption_list, vg
     print("vgg predict - success")
     for i in range(len(test)):
         print(file_list[i] + " : , Predict : "+ str(categories[predict[i]]))
-    nongraph_url_list = []
     nongraph_image_list = []
     nongraph_caption_list = []
     for i in range(len(test)):
         if predict[i] == 1:
-            if query_flag == 0:
-                nongraph_image_list.append(image_list[i])
-            else:
-                nongraph_image_list.append(url_list[i])
+            nongraph_image_list.append(image_list[i])
             nongraph_caption_list.append(caption_list[i])
     return nongraph_image_list, nongraph_caption_list
 
 
-
-
 #-----------calculate semantic similarity and recommend image-----------------------
-#@profile
 def semantic_similarity_module(g, init_op, embedded_text, text_input, query, nongraph_image_list, nongraph_caption_list):
     query_embedding = USE_embedding(query, g, init_op, embedded_text, text_input)
     nongraph_caption_embedding = USE_embedding(nongraph_caption_list,  g, init_op, embedded_text, text_input)
@@ -137,5 +124,4 @@ def semantic_similarity_module(g, init_op, embedded_text, text_input, query, non
             DC[i][j] = spatial.distance.cosine(query_embedding, nongraph_caption_embedding[j])
     final_image = nongraph_image_list[DC[0].index(min(DC[0]))]
     return final_image
-
 
