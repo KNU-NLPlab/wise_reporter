@@ -28,7 +28,6 @@ class ImageSelectionModule(BaseModule):
         check_query_exist = os.listdir(path_cached)
         if query not in check_query_exist:  # case 1 : if query is new - download images & caption from google, scouter caching(url, caption), local caching(image path, caption)
             print("query is new")
-            newtime = time.time()
             if type(query) is list:
                 topic = []
                 topic.append(query[0].replace('/','_'))
@@ -46,12 +45,18 @@ class ImageSelectionModule(BaseModule):
                 except IndexError:
                     print("try image download again")
                     try_iter = try_iter + 1
-            print("image and caption downloaded")
+
+            if len(file_list) == 0:
+                shutil.rmtree('./downloads/%s'%(query), ignore_errors=True)
+                print("query does not have any images on Google search engine")
+                return False
 
             # --- scouter caching ---
             if output == None:
                 image_dict = { 'keyword': query, 'image': dict_image[query][0], 'caption': dict_image[query][1]} 
                 res = self.es.index(index='image', body=image_dict)
+            else:
+                print("query already cached in scouter")
 
             # --- local caching ---
             try:
@@ -69,18 +74,20 @@ class ImageSelectionModule(BaseModule):
                     f.write("%s\n"%captionfile)
 
         else: # case 2 : if query is used before - use local cached data
-            print("query already used before")
-            if type(query) is list:
-                topic = []
-                topic.append(query[0].replace('/','_'))
-            if type(query) is not list:
-                query = query.replace('/','_')
-                topic = []
-                topic.append(query)
-            localcache_name = 'localcache/%s.txt'%(query)
-            file_list, image_list, caption_list = image_caption_get(localcache_name, download_limit)
-        if len(file_list) == 0:
-            return False
+            try:
+                print("query already used before")
+                if type(query) is list:
+                    topic = []
+                    topic.append(query[0].replace('/','_'))
+                if type(query) is not list:
+                    query = query.replace('/','_')
+                    topic = []
+                    topic.append(query)
+                localcache_name = 'localcache/%s.txt'%(query)
+                file_list, image_list, caption_list = image_caption_get(localcache_name, download_limit)
+            except IOError:
+                print("query does not have cached images and captions")
+                return False
 
         nongraph_image_list, nongraph_caption_list = VGG_classifier(file_list, image_list, caption_list, self.vggModel) ###
         final_image = semantic_similarity_module(self.g, self.init_op, self.embedded_text, self.text_input, topic, nongraph_image_list, nongraph_caption_list) ####
