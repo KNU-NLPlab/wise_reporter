@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 import sys
 
-def keywordGetter(date):
+def keywordGetter(date, index='keyword_news'):
     '''
     Keyword getter method to request keyword set contains related news article 
     to SCOUTER system
@@ -16,7 +16,7 @@ def keywordGetter(date):
             }
         }
     }
-    res = es.search(index='keyword_news', body=query)
+    res = es.search(index=index, body=query)
     
     if res['hits']['total']['value'] == 0:
         return False

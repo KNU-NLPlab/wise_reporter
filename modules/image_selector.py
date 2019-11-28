@@ -3,6 +3,8 @@ from modules.image_selection.image_selection_2019_v2 import *
 from keras.models import load_model
 from elasticsearch import Elasticsearch
 
+import re
+
 class ImageSelectionModule(BaseModule):
     def __init__(self, out_path):        
         self.out_path = out_path
@@ -18,7 +20,10 @@ class ImageSelectionModule(BaseModule):
         self.g.finalize()
         print("graph defined")
         
-    def process_data(self, query, image_save_path, download_limit = 50):
+        self.pattern = re.compile("[\|/|:|\*|?|\"|<|>|\|]")
+        
+    def process_data(self, query, image_save_path, download_limit = 50, silence=True):
+        query = self.pattern.sub(" ", query)
         es_query = {'query':{'match':{'keyword':query}}}
         res = self.es.search(index='image', body=es_query)
         if res['hits']['total']['value'] == 0:
@@ -28,7 +33,8 @@ class ImageSelectionModule(BaseModule):
         path_cached = ('./downloads')
         check_query_exist = os.listdir(path_cached)
         if query not in check_query_exist:  # case 1 : if query is new - download images & caption from google, scouter caching(url, caption), local caching(image path, caption)
-            print("query is new")
+            if not silence:
+                print("query is new")
             if type(query) is list:
                 topic = []
                 topic.append(query[0].replace('/','_'))
@@ -36,7 +42,8 @@ class ImageSelectionModule(BaseModule):
                 query = query.replace('/','_')
                 topic = []
                 topic.append(query)
-            print("query pre-processed")
+            if not silence:
+                print("query pre-processed")
             try_iter = 1
             while try_iter < 5: # handling VGG16 input error, no image found in google
                 try:
@@ -91,8 +98,9 @@ class ImageSelectionModule(BaseModule):
                 print("query does not have cached images and captions")
                 return False
 
-        nongraph_image_list, nongraph_caption_list = VGG_classifier(file_list, image_list, caption_list, self.vggModel) ###
-        final_image = semantic_similarity_module(self.g, self.init_op, self.embedded_text, self.text_input, topic, nongraph_image_list, nongraph_caption_list) ####
+        nongraph_image_list, nongraph_caption_list = VGG_classifier(file_list, image_list, caption_list, self.vggModel, silence) ###
+        final_image = semantic_similarity_module(self.g, self.init_op, self.embedded_text, self.text_input,
+                                                 topic, nongraph_image_list, nongraph_caption_list, silence) ####
         imgsave_path = image_save_path # path to save final recommended image
         temp_image = Image.open(final_image)
         temp_image = temp_image.convert('RGB')

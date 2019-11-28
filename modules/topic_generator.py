@@ -8,8 +8,6 @@ import json
 
 class TopicGenerator(BaseModule):
     
-                 
-    
     def __init__(self, topic, out_path):
         super(TopicGenerator, self).__init__(topic, out_path)
         self.getDoc = es.ScouterHandler()

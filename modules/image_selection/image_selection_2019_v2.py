@@ -92,7 +92,7 @@ def image_caption_downloader(query, download_limit):
 
 
 #-----------VGG graph/non-graph image classifier--------------------------------
-def VGG_classifier(file_list, image_list, caption_list, vggModel):
+def VGG_classifier(file_list, image_list, caption_list, vggModel, silence):
     resized_image_list = []  
     for i in range(len(image_list)):
         resized = Image.open(image_list[i]).convert('RGB').resize((224,224))
@@ -100,11 +100,13 @@ def VGG_classifier(file_list, image_list, caption_list, vggModel):
         resized_image_list.append(pix)
     categories = ["graph","others"] # label 0 : graph image / label 1 : non-graph
     test = np.array(resized_image_list)
-    print(test.shape)
+    if not silence:
+        print(test.shape)
     predict = vggModel.predict_classes(test)
-    print("vgg predict - success")
-    for i in range(len(test)):
-        print(file_list[i] + " : , Predict : "+ str(categories[predict[i]]))
+    if not silence:
+        print("vgg predict - success")
+        for i in range(len(test)):
+            print(file_list[i] + " : , Predict : "+ str(categories[predict[i]]))
     nongraph_image_list = []
     nongraph_caption_list = []
     for i in range(len(test)):
@@ -115,7 +117,7 @@ def VGG_classifier(file_list, image_list, caption_list, vggModel):
 
 
 #-----------calculate semantic similarity and recommend image-----------------------
-def semantic_similarity_module(g, init_op, embedded_text, text_input, query, nongraph_image_list, nongraph_caption_list):
+def semantic_similarity_module(g, init_op, embedded_text, text_input, query, nongraph_image_list, nongraph_caption_list, silence):
     query_embedding = USE_embedding(query, g, init_op, embedded_text, text_input)
     nongraph_caption_embedding = USE_embedding(nongraph_caption_list,  g, init_op, embedded_text, text_input)
     DC = [[0 for x in range(len(nongraph_caption_list))] for x in range(len(query))]

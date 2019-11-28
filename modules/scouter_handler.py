@@ -128,7 +128,7 @@ class ScouterHandler():
         keyword_list = keyword.split(' ')
         
         # make a conjugated filter for elasticsearch
-        and_query = [{ "match": { "extContent": word } } for word in keyword_list]
+        and_query = [{ "match": { "keyword": word } } for word in keyword_list]
         query_body = { 'query': {"bool": {"must":and_query} } }
         if filters is not None:
             query_body['_source'] = filters
