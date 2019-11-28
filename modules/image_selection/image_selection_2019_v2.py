@@ -22,6 +22,7 @@ config.gpu_options.allow_growth=True
 set_session = tf.Session(config=config)
 
 
+
 #---------sentence embedding module--------------
 def USE_embedding(input_text, g, init_op, embedded_text, text_input):
     session = tf.Session(graph=g)
@@ -31,22 +32,26 @@ def USE_embedding(input_text, g, init_op, embedded_text, text_input):
 
 
 #---------get image and caption from local cached data--------------
-def image_caption_get(localcache_name, download_limit):
+def image_caption_get(localcache_img_name, localcache_caption_name):
     file_list = []
     image_list = []
     caption_list = []
-    f = open(localcache_name,'r')
-    it = 0
+    f = open(localcache_img_name,'r')
     while True:
         line = f.readline()
-        if it < download_limit :
-            file_list.append((line.split('/')[-1]).splitlines()[0])
-            image_list.append(line.splitlines()[0])
-            it = it + 1
-        elif it >= download_limit and it < download_limit*2 :
-            caption_list.append(line.splitlines()[0])
-            it = it + 1       
         if not line: break
+        file_list.append((line.split('/')[-1]).splitlines()[0])
+        image_list.append(line.splitlines()[0])
+    f.close()
+    print(file_list)
+    print(image_list)
+    f2 = open(localcache_caption_name,'r')
+    while True:
+        line = f2.readline()
+        if not line: break
+        caption_list.append(line.splitlines()[0])
+    f2.close()
+    print(caption_list)
     return file_list, image_list, caption_list
 
 
@@ -92,7 +97,7 @@ def image_caption_downloader(query, download_limit):
 
 
 #-----------VGG graph/non-graph image classifier--------------------------------
-def VGG_classifier(file_list, image_list, caption_list, vggModel, silence):
+def VGG_classifier(file_list, image_list, caption_list, vggModel):
     resized_image_list = []  
     for i in range(len(image_list)):
         resized = Image.open(image_list[i]).convert('RGB').resize((224,224))
@@ -100,13 +105,11 @@ def VGG_classifier(file_list, image_list, caption_list, vggModel, silence):
         resized_image_list.append(pix)
     categories = ["graph","others"] # label 0 : graph image / label 1 : non-graph
     test = np.array(resized_image_list)
-    if not silence:
-        print(test.shape)
+    print(test.shape)
     predict = vggModel.predict_classes(test)
-    if not silence:
-        print("vgg predict - success")
-        for i in range(len(test)):
-            print(file_list[i] + " : , Predict : "+ str(categories[predict[i]]))
+    print("vgg predict - success")
+    for i in range(len(test)):
+        print(file_list[i] + " : , Predict : "+ str(categories[predict[i]]))
     nongraph_image_list = []
     nongraph_caption_list = []
     for i in range(len(test)):
@@ -117,7 +120,7 @@ def VGG_classifier(file_list, image_list, caption_list, vggModel, silence):
 
 
 #-----------calculate semantic similarity and recommend image-----------------------
-def semantic_similarity_module(g, init_op, embedded_text, text_input, query, nongraph_image_list, nongraph_caption_list, silence):
+def semantic_similarity_module(g, init_op, embedded_text, text_input, query, nongraph_image_list, nongraph_caption_list):
     query_embedding = USE_embedding(query, g, init_op, embedded_text, text_input)
     nongraph_caption_embedding = USE_embedding(nongraph_caption_list,  g, init_op, embedded_text, text_input)
     DC = [[0 for x in range(len(nongraph_caption_list))] for x in range(len(query))]
@@ -126,4 +129,3 @@ def semantic_similarity_module(g, init_op, embedded_text, text_input, query, non
             DC[i][j] = spatial.distance.cosine(query_embedding, nongraph_caption_embedding[j])
     final_image = nongraph_image_list[DC[0].index(min(DC[0]))]
     return final_image
-
