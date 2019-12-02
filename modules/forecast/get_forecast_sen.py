@@ -55,7 +55,11 @@ class forecasting():
                     except:
                         pass
                     if output == '1' and confidence[0][1] >= 0.9:
-                        forecast_list.append(sentence['text'] + '\t' + str(confidence[0][1]))
+                        sentence['text'] = sentence['text'].strip()
+                        forecast_list.append([confidence[0][1], sentence['text']])
+
+        # 상위 전망 5개만 뽑기
+        forecast_list = [element[1] + '\t' + str(float(element[0])) for element in sorted(forecast_list, reverse=True)[:5]]
         return forecast_list
 
     # def make_morp_sentence(self, morph_json):
