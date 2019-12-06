@@ -120,6 +120,10 @@ class Beam(object):
                     ngrams = set()
                     fail = False
                     gram = []
+                    ##########
+                    if (sum([a == hyp[-1] for a in hyp[-7:]]) > 1) and (hyp[-1] not in self.exclusion_tokens):
+                        fail = True
+                    ##########
                     for i in range(le - 1):
                         # Last n tokens, n = block_ngram_repeat
                         gram = (gram +
