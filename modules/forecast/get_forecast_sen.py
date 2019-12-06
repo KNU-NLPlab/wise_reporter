@@ -3,6 +3,7 @@ from modules.forecast.model import cnnmodel
 from modules.forecast import prediction
 import torch
 import datetime
+import operator
 
 class forecasting():
     def __init__(self):
@@ -20,12 +21,12 @@ class forecasting():
         return self.forecast_sentences(doc_info_list)
 
 
-    def convert_datetime(self, today):
-        today_datetime = datetime.datetime.strptime(today, '%Y-%m-%d').date()
+    def convert_datetime(self, last_day):
+        today_datetime = datetime.datetime.strptime(last_day, '%Y-%m-%d').date()
         week_before = (today_datetime + datetime.timedelta(days=- 7))
         return today_datetime, week_before
 
-    def forecast_sentences(self, doc_info_list, today):
+    def forecast_sentences(self, doc_info_list, number_of_sentences):
 
         fields = torch.load('modules/forecast/model/fields.field')
         text_field = fields['text_filed']
@@ -36,7 +37,11 @@ class forecasting():
         cnn = cnnmodel.CNN_text(len(text_field.vocab), 64, len(label_field.vocab)-1, 100, kernel_sizes)
         cnn.load_state_dict(torch.load(self.model_name, map_location=lambda storage, loc: storage))
 
-        today_datetime, week_before = self.convert_datetime(today)
+        #수집한 기사들 중 제일 최근 기사의 날짜를 받아온다.
+        # 문서의 date들을 리스트로 만든후 정렬, 그리고 제일 첫 번째 인덱스로 받아옴
+        last_day = sorted([ doc['postingDate'] for doc in doc_info_list ], reverse=True)[0]
+
+        today_datetime, week_before = self.convert_datetime(last_day)
 
 
         forecast_list = []
@@ -59,7 +64,7 @@ class forecasting():
                         forecast_list.append([confidence[0][1], sentence['text']])
 
         # 상위 전망 5개만 뽑기
-        forecast_list = [element[1] + '\t' + str(float(element[0])) for element in sorted(forecast_list, reverse=True)[:5]]
+        forecast_list = [element[1] + '\t' + str(float(element[0])) for element in sorted(forecast_list, reverse=True)[:number_of_sentences]]
         return forecast_list
 
     # def make_morp_sentence(self, morph_json):
