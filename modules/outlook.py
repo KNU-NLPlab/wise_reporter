@@ -18,11 +18,11 @@ class ForecastSentence(BaseModule):
         # super(ForecastSentence, self).__init__(topic, out_path)
         # self.forecasting = forecasting(gpu)
 
-    def process_data(self, doc_list, today):
+    def process_data(self, doc_list, number_of_sentences):
         '''
         Overrided method from BaseModule class
         Args:
             documents_list (list): a list of plain documents [str, str, ..., ]
         '''
 
-        return self.forecasting.forecast_sentences(doc_list, today)
+        return self.forecasting.forecast_sentences(doc_list, number_of_sentences)
