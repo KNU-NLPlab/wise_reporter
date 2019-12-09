@@ -43,8 +43,11 @@ class mds():
         opt.length_penalty = 'wu'
         opt.alpha = 0.9
         opt.block_ngram_repeat = 3
-        opt.ignore_when_blocking = [".", "</t", "<t>"]
+        opt.ignore_when_blocking = [".", "</t", "<t>", ",_", "%"]
+        opt.max_length = 300
+        opt.min_length = 35
         opt.gpu = 0
+        opt.segment=True
 
         logger = init_logger(opt.log_file)
         self.translator = build_translator(opt, report_score=True)
