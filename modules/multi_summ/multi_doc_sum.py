@@ -4,6 +4,7 @@ from onmt.utils.logging import init_logger
 from onmt.utils.misc import split_corpus
 from onmt.translate.translator import build_translator
 from bert_eojeol_pytorch.src_tokenizer import tokenization
+import nltk
 import onmt.opts as opts
 import torch
 import copy
@@ -82,6 +83,9 @@ class mds():
         data_iter = [{'raw_src': raw_src, 'src': src.transpose(0, 1).to('cuda'), 'indices': indices, 'src_map': src_map.to('cuda'), 'itos': itos, 'stoi': stoi, 'src_lengths': src_lengths.to('cuda')}]
 
         translations = self.translator.translate(src=[' '.join(raw_src[0]).encode('utf-8')], tgt=None, src_dir='', batch_size=1, attn_debug=False, data_iter=data_iter)
-        tgt = ' '.join(translations[0].pred_sents[0]).replace(' ', '').replace('_', ' ')
-
+        if translations[0].pred_sents[0][-1] == '._' and translations[0].pred_sents[0][-2] == '._':
+            tgt = ' '.join([sln for sln in nltk.sent_tokenize(' '.join(translations[0].pred_sents[0]).replace(' ', '').replace('_', ' ')) if sln != '._'])
+        else:
+            tgt = ' '.join(translations[0].pred_sents[0]).replace(' ', '').replace('_', ' ')
+        
         return tgt
