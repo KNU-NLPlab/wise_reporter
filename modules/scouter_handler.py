@@ -114,7 +114,7 @@ class ScouterHandler():
             return docs
         
     @classmethod
-    def make_keyword_query_body(self, keyword, filters=None):
+    def make_keyword_query_body(self, keyword, match_item='extContent', keyword_tie="should", filters=None):
         '''
         Make a query body with keyword string
         Args:
@@ -128,8 +128,8 @@ class ScouterHandler():
         keyword_list = keyword.split(' ')
         
         # make a conjugated filter for elasticsearch
-        and_query = [{ "match": { "keyword": word } } for word in keyword_list]
-        query_body = { 'query': {"bool": {"must":and_query} } }
+        and_query = [{ "match": { match_item: word } } for word in keyword_list]
+        query_body = { 'query': {"bool": {keyword_tie:and_query} } }
         if filters is not None:
             query_body['_source'] = filters
         

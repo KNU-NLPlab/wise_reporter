@@ -32,7 +32,7 @@ class TimelineSummary(BaseModule):
         self.doc_slice = 1000
         
 
-    def process_data(self, doc_info_list, timeline_threshold=0.5, phrase_threshold=20):
+    def process_data(self, topic, doc_info_list, timeline_threshold=0.5, phrase_threshold=20):
         '''
         Overrided method from BaseModule class
         Extract top keyword and document id in several subtopics
@@ -40,6 +40,7 @@ class TimelineSummary(BaseModule):
             top_doc_morph_sentence_list (list): a list of morph sentences in top documents
             top_keyword_list (list): a list of keywords of top documents
         '''
+        self.topic = topic
         doc_save_list = self._preprocess(doc_info_list, len(doc_info_list))
         
         # summary -> demo main page
@@ -60,7 +61,7 @@ class TimelineSummary(BaseModule):
         doc_save_list = []
 
         for elemNews in doc_info_list:
-            elemNews["id"] = elemNews.pop("news_id")
+            #elemNews["id"] = elemNews.pop("news_id")
             elemNews["writetime"] = elemNews.pop("postingDate")
             doc_save_list.append(elemNews)
 
@@ -82,7 +83,7 @@ class TimelineSummary(BaseModule):
             onlyburst = True
             alpha = 1 / 3
             beta = 0
-        elif topic == '브렉시트 메이총리 英':
+        elif topic == '브렉시트 메이 총리 英':
             timeline_threshold = 0.5
             phrase_threshold = 20
             onlyburst = True
@@ -95,11 +96,16 @@ class TimelineSummary(BaseModule):
             alpha = 1 / 3
             beta = 0
         else:
-            timeline_threshold = 0.5
+            timeline_threshold = 0.4
             phrase_threshold = 20
-            onlyburst = True
+            onlyburst = False
             alpha = 1 / 3
             beta = 0
+#             timeline_threshold = 0.5
+#             phrase_threshold = 20
+#             onlyburst = True
+#             alpha = 1 / 3
+#             beta = 0
         return timeline_threshold, phrase_threshold, onlyburst, alpha, beta
 
     def _summarization(self, doc_save_list, timeline_threshold, phrase_threshold):
