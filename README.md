@@ -1,7 +1,5 @@
-# wise_reporter
-
-## 임시
-[test.ipynb](https://github.com/KNU-NLPlab/wise_reporter/blob/dependabot/pip/modules/image_selection/pillow-6.2.1/test.ipynb) 참조
+# 어떤 주제에 대한 빅데이터를 스마트 보고서로 요약하는 기술 개발
+'어떤 주제에 대한 빅데이터를 스마트 보고서로 요약하는 기술 개발'의 통합 관리 Repository입니다.
 
 ## 모듈 현황 및 Refactoring 진행 상황
 1. Topic Generator
@@ -21,6 +19,3 @@ modules의 이미 구현된 다른 모듈(1, 2번 Module)들을 참고하시면 
 ## 문의사항
 
 최우용 석사과정 (wychoi@sejong.knu.ac.kr) 에게 문의바랍니다.
-
-다중문서요약 모델 관련해서는 신용민 석사과정 (ymshin@sejong.knu.ac.kr) 에게 문의바랍니다.
-
